@@ -1,5 +1,6 @@
-import { NgModule } from '@angular/core';
-import { ExtraOptions, RouterModule, Routes } from '@angular/router';
+import { Location } from '@angular/common';
+import { inject, NgModule } from '@angular/core';
+import { ExtraOptions, NavigationError, RouterModule, Routes } from '@angular/router';
 
 import { isFeatureEnabled } from '@core/config/feature.guard';
 import { AviationAuthGuard } from '@core/guards/aviation-auth.guard';
@@ -8,6 +9,7 @@ import { LoggedInGuard } from '@core/guards/logged-in.guard';
 import { NonAuthGuard } from '@core/guards/non-auth.guard';
 import { PendingRequestGuard } from '@core/guards/pending-request.guard';
 import { TermsAndConditionsGuard } from '@core/guards/terms-and-conditions.guard';
+import { isChunkLoadError, reloadForStaleChunk } from '@core/util/chunk-load-error.util';
 import { externalRedirectGuard } from '@shared/guards/external-redirect.guard';
 
 import { AccessibilityComponent } from './accessibility/accessibility.component';
@@ -281,6 +283,14 @@ const routes: Routes = [
 
 const routerOptions: ExtraOptions = {
   paramsInheritanceStrategy: 'always',
+  // During a rolling deployment a lazy route may reference a chunk hash that the freshly-rolled-out
+  // pods no longer serve. Load the attempted URL to pull the new index.html and recover,
+  // instead of letting the failure fall through to the generic /error/500 page.
+  errorHandler: (event: NavigationError) => {
+    if (isChunkLoadError(event.error)) {
+      reloadForStaleChunk(inject(Location).prepareExternalUrl(event.url));
+    }
+  },
 };
 
 @NgModule({
