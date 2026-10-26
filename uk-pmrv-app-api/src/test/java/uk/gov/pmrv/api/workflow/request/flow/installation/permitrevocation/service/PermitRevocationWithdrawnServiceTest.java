@@ -1,13 +1,5 @@
 package uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -15,7 +7,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.netz.api.files.common.domain.dto.FileInfoDTO;
+import uk.gov.pmrv.api.integration.registry.notification.installation.request.InstallationNotificationRegistryEvent;
 import uk.gov.pmrv.api.workflow.request.core.domain.Request;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestActionPayloadType;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestActionType;
@@ -26,8 +20,16 @@ import uk.gov.pmrv.api.workflow.request.flow.common.domain.dto.RequestActionUser
 import uk.gov.pmrv.api.workflow.request.flow.common.service.RequestActionUserInfoResolver;
 import uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.domain.PermitRevocationApplicationWithdrawnRequestActionPayload;
 import uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.domain.PermitRevocationRequestPayload;
-import uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.service.PermitRevocationWithdrawnService;
 import uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.service.notification.PermitRevocationOfficialNoticeService;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PermitRevocationWithdrawnServiceTest {
@@ -43,6 +45,9 @@ class PermitRevocationWithdrawnServiceTest {
     
     @Mock
     private RequestActionUserInfoResolver requestActionUserInfoResolver;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Test
     void withdraw() {
@@ -98,6 +103,8 @@ class PermitRevocationWithdrawnServiceTest {
         verify(permitRevocationOfficialNoticeService, times(1)).generateRevocationWithdrawnOfficialNotice(request.getId());
         verify(permitRevocationOfficialNoticeService, times(1))
             .sendOfficialNotice(request, withdrawnOfficialNotice, withdrawDecisionNotification);
+        verify(applicationEventPublisher, times(1)).publishEvent(Mockito.any(InstallationNotificationRegistryEvent.class));
+
 
         final PermitRevocationApplicationWithdrawnRequestActionPayload actionPayloadCaptured =
             requestActionPayloadCaptor.getValue();

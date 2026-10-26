@@ -1,0 +1,54 @@
+@if (vm(); as vm) {
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      @if (isErrorSummaryDisplayed()) {
+        <govuk-error-summary [form]="form"></govuk-error-summary>
+      }
+
+      <app-page-heading caption="Emission factors" size="l">Check your answers</app-page-heading>
+
+      <dl govuk-summary-list>
+        <div govukSummaryListRow>
+          <dt govukSummaryListRowKey>Uploaded file</dt>
+          <dd govukSummaryListRowValue>
+            <a govukLink [href]="fileUrl" [download]="vm.fileName">{{ vm.fileName }}</a>
+          </dd>
+          <dd govukSummaryListRowActions>
+            <a govukLink hidden-text="uploaded file" routerLink="..">Change</a>
+          </dd>
+        </div>
+      </dl>
+
+      <h2 class="govuk-heading-m">Regional natural gas emission factors</h2>
+      <div class="overflow-auto overflow-auto-table govuk-!-margin-bottom-6">
+        <govuk-table [columns]="vm.regionalColumns" [data]="vm.regionalRows"></govuk-table>
+      </div>
+
+      <h2 class="govuk-heading-m">National inventory data criteria</h2>
+      <div class="overflow-auto overflow-auto-table govuk-!-margin-bottom-6">
+        <govuk-table [columns]="vm.nationalInventoryColumns" [data]="vm.nationalInventoryRows">
+          <ng-template let-column="column" let-row="row">
+            @switch (column.field) {
+              @case ('ncvMeasurementUnit') {
+                {{ vm.ncvUnitLabels[row.ncvMeasurementUnit] }}
+              }
+              @default {
+                {{ row[column.field] }}
+              }
+            }
+          </ng-template>
+        </govuk-table>
+      </div>
+
+      <div class="govuk-button-group">
+        <button govukButton type="button" [disabled]="isSubmitting()" (click)="onConfirm()">
+          Confirm and complete
+        </button>
+      </div>
+
+      <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+
+      <p class="govuk-body"><a govukLink routerLink="../..">Return to: Emission factors</a></p>
+    </div>
+  </div>
+}

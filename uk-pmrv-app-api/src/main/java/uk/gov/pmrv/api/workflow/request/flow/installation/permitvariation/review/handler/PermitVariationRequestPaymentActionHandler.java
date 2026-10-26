@@ -50,6 +50,7 @@ public class PermitVariationRequestPaymentActionHandler {
         paymentDetails.setManualPaymentInitiationPending(true);
         PermitVariationRequestPayload requestPayload = (PermitVariationRequestPayload) request.getPayload();
         requestPayload.setRequestPaymentDetails(paymentDetails);
+        requestPayload.setPaymentCompleted(false);
 
         requestService.addActionToRequest(
                 request,

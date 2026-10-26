@@ -12,6 +12,7 @@ import uk.gov.netz.api.notificationapi.mail.config.property.NotificationProperti
 import uk.gov.netz.api.token.JwtProperties;
 import uk.gov.netz.api.token.JwtTokenAction;
 import uk.gov.netz.api.token.JwtTokenService;
+import uk.gov.pmrv.api.common.exception.MetsErrorCode;
 import uk.gov.pmrv.api.notification.mail.constants.PmrvEmailNotificationTemplateConstants;
 import uk.gov.pmrv.api.notification.template.domain.enumeration.PmrvNotificationTemplateName;
 import uk.gov.pmrv.api.user.NavigationOutcomes;
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +54,10 @@ class UserResetPasswordServiceTest {
 
     @Mock
     private NotificationProperties notificationProperties;
-    
+
+    @Mock
+    private UserEmailRateLimiter userEmailRateLimiter;
+
     private static final String EMAIL = "email@email.com";
     private static final String TOKEN = "test.jwt.token";
     private static final String PASSWORD = "Password123!";
@@ -76,6 +81,7 @@ class UserResetPasswordServiceTest {
         userResetPasswordService.sendResetPasswordEmail(EMAIL);
 
         // verify
+        verify(userEmailRateLimiter, times(1)).consume(PmrvNotificationTemplateName.RESET_PASSWORD_REQUEST, EMAIL);
         ArgumentCaptor<UserNotificationWithRedirectionLinkInfo> notificationInfoCaptor =
             ArgumentCaptor.forClass(UserNotificationWithRedirectionLinkInfo.class);
         verify(userNotificationService, times(1)).notifyUserWithLink(notificationInfoCaptor.capture());
@@ -106,9 +112,23 @@ class UserResetPasswordServiceTest {
         userResetPasswordService.sendResetPasswordEmail(EMAIL);
 
         // verify
+        verify(userEmailRateLimiter, times(1)).consume(PmrvNotificationTemplateName.RESET_PASSWORD_REQUEST, EMAIL);
         ArgumentCaptor<UserNotificationWithRedirectionLinkInfo> notificationInfoCaptor =
             ArgumentCaptor.forClass(UserNotificationWithRedirectionLinkInfo.class);
         verify(userNotificationService, times(0)).notifyUserWithLink(notificationInfoCaptor.capture());
+    }
+
+    @Test
+    void sendResetPasswordEmail_too_many_requests() {
+        doThrow(new BusinessException(MetsErrorCode.TOO_MANY_REQUESTS))
+            .when(userEmailRateLimiter).consume(PmrvNotificationTemplateName.RESET_PASSWORD_REQUEST, EMAIL);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+            () -> userResetPasswordService.sendResetPasswordEmail(EMAIL));
+        assertThat(ex.getErrorCode()).isEqualTo(MetsErrorCode.TOO_MANY_REQUESTS);
+
+        // the user is not looked up, so the response is the same whether the user exists or not
+        verifyNoInteractions(userAuthService, userNotificationService);
     }
     
     @Test

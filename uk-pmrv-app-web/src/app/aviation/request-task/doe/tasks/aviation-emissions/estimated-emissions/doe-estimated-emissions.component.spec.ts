@@ -86,4 +86,28 @@ describe('EstimatedEmissionsComponent', () => {
 
     saveDoeSpy.mockRestore();
   });
+
+  it('should associate each emissions field with its hint (and, where present, error) ids via aria-describedby', () => {
+    formProvider.setFormValue({
+      determinationReason: {
+        type: 'VERIFIED_EMISSIONS_REPORT_HAS_NOT_BEEN_SUBMITTED',
+      },
+    } as AviationDoECorsia);
+    fixture.detectChanges();
+
+    const getInput = (name: string) => fixture.nativeElement.querySelector(`input[name="${name}"]`) as HTMLInputElement;
+
+    expect(getInput('emissionsAllInternationalFlights').getAttribute('aria-describedby')).toEqual(
+      'emissionsAllInternationalFlights-hint emissionsAllInternationalFlights-error',
+    );
+    expect(getInput('emissionsFlightsWithOffsettingRequirements').getAttribute('aria-describedby')).toEqual(
+      'emissionsFlightsWithOffsettingRequirements-hint emissionsFlightsWithOffsettingRequirements-error',
+    );
+    expect(getInput('emissionsClaimFromCorsiaEligibleFuels').getAttribute('aria-describedby')).toEqual(
+      'emissionsClaimFromCorsiaEligibleFuels-hint',
+    );
+
+    expect(fixture.nativeElement.querySelector('#emissionsAllInternationalFlights-hint')).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('#emissionsFlightsWithOffsettingRequirements-hint')).toBeTruthy();
+  });
 });

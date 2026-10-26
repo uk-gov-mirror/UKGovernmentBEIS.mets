@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 import { catchError, Observable, pipe, throwError, UnaryFunction } from 'rxjs';
 
-import { HttpStatus } from '@error/http-status';
+import { HttpStatus, HttpStatuses } from '@error/http-status';
 
 export function catchElseRethrow<T, R, E = HttpErrorResponse>(
   predicate: UnaryFunction<E, boolean>,
@@ -26,6 +26,12 @@ export function catchBadRequest(
 
 export function catchTaskReassignedBadRequest(handler: (res: HttpErrorResponse) => Observable<any>) {
   return catchBadRequest('REQUEST_TASK_ACTION1001', handler);
+}
+
+export function catchTooManyRequests(handler: (res: HttpErrorResponse) => Observable<any>) {
+  return pipe(
+    catchElseRethrow((res) => res instanceof HttpErrorResponse && res.status === HttpStatuses.TooManyRequests, handler),
+  );
 }
 
 export function isBadRequest(res: unknown, codes?: ErrorCodes | ErrorCodes[] | string): res is BadRequest {
@@ -92,6 +98,7 @@ export interface BadRequest extends HttpErrorResponse {
   status: HttpStatus;
   error: {
     code: string;
+    message?: string;
     data: unknown;
   };
 }

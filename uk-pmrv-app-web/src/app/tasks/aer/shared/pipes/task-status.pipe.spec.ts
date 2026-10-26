@@ -6,7 +6,10 @@ import { firstValueFrom } from 'rxjs';
 import { AerModule } from '@tasks/aer/aer.module';
 import { AerService } from '@tasks/aer/core/aer.service';
 import { mockAerDataReviewDecisionAmends, mockReview } from '@tasks/aer/review/testing/mock-review';
-import { mockAerApplyPayload } from '@tasks/aer/submit/testing/mock-aer-apply-action';
+import {
+  mockAerApplyPayload,
+  mockAerApplyPayloadWithNonNegativeEmissions,
+} from '@tasks/aer/submit/testing/mock-aer-apply-action';
 import { mockVerificationApplyPayload } from '@tasks/aer/verification-submit/testing/mock-verification-apply-action';
 import { CommonTasksStore } from '@tasks/store/common-tasks.store';
 import { KeycloakService } from 'keycloak-angular';
@@ -67,7 +70,7 @@ describe('TaskStatusPipe', () => {
           type: 'AER_APPLICATION_SUBMIT',
           payload: {
             payloadType: 'AER_APPLICATION_SUBMIT_PAYLOAD',
-            aer: mockAerApplyPayload.aer,
+            aer: mockAerApplyPayloadWithNonNegativeEmissions.aer,
             aerSectionsCompleted: {
               ...mockAerApplyPayload.aerSectionsCompleted,
               sourceStreams: [true],
@@ -102,7 +105,7 @@ describe('TaskStatusPipe', () => {
           type: 'AER_APPLICATION_SUBMIT',
           payload: {
             payloadType: 'AER_APPLICATION_SUBMIT_PAYLOAD',
-            aer: mockAerApplyPayload.aer,
+            aer: mockAerApplyPayloadWithNonNegativeEmissions.aer,
             aerSectionsCompleted: {},
           } as AerApplicationSubmitRequestTaskPayload,
         },

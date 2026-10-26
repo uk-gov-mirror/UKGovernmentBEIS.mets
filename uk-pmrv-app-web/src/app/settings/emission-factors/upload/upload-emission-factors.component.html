@@ -1,0 +1,47 @@
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    @if (isErrorSummaryDisplayed()) {
+      <govuk-error-summary [form]="form"></govuk-error-summary>
+    }
+
+    <app-page-heading caption="Emission factors" size="l">Upload emission factors data</app-page-heading>
+
+    @if (isUpdate()) {
+      <govuk-warning-text>
+        You are updating the emission factors. The current data for this year will be replaced.
+      </govuk-warning-text>
+    }
+
+    <p class="govuk-body">
+      Upload the annual UK greenhouse gas inventory carbon emission factors and calorific values file published by
+      DESNZ. The system will parse the Regional Natural Gas Data and Emission Factors & CVs sheets and populate the
+      values for review.
+    </p>
+
+    <p class="govuk-body">
+      The latest published file is available on
+      <a
+        govukLink
+        href="https://www.gov.uk/government/publications/using-uk-greenhouse-gas-inventory-data-in-uk-ets-monitoring-and-reporting-the-country-specific-factor-list"
+        target="_blank"
+        rel="noopener">
+        GOV.UK
+      </a>
+      (opens in new tab).
+    </p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <h2 class="govuk-heading-m">Upload file</h2>
+      <p id="file-hint" class="govuk-hint">
+        The file must be an XLSX spreadsheet in the published UK GGI format, no more than 20MB. The reference year is
+        read automatically from the file name.
+      </p>
+
+      <div formControlName="file" govukFileUpload label="Upload file" [isLabelHidden]="true" accepted=".xlsx"></div>
+
+      <button govukButton type="submit" [disabled]="isSubmitting()">Continue</button>
+    </form>
+
+    <p class="govuk-body"><a govukLink routerLink="..">Return to: Emission factors</a></p>
+  </div>
+</div>

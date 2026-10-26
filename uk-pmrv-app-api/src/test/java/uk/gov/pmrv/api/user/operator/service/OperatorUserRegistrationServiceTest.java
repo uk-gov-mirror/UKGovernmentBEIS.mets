@@ -7,7 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.netz.api.authorization.core.domain.AppUser;
 import uk.gov.netz.api.authorization.operator.service.OperatorAuthorityService;
+import uk.gov.netz.api.common.exception.BusinessException;
 import uk.gov.pmrv.api.account.service.AccountQueryService;
+import uk.gov.pmrv.api.common.exception.MetsErrorCode;
+import uk.gov.pmrv.api.notification.template.domain.enumeration.PmrvNotificationTemplateName;
+import uk.gov.pmrv.api.user.core.service.UserEmailRateLimiter;
 import uk.gov.pmrv.api.user.operator.domain.OperatorUserDTO;
 import uk.gov.pmrv.api.user.operator.domain.OperatorUserInvitationDTO;
 import uk.gov.pmrv.api.user.operator.domain.OperatorUserRegistrationWithCredentialsDTO;
@@ -17,8 +21,11 @@ import uk.gov.pmrv.api.user.operator.domain.OperatorUserTokenVerificationStatus;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,7 +48,10 @@ class OperatorUserRegistrationServiceTest {
 
     @Mock
     private OperatorUserNotificationGateway operatorUserNotificationGateway;
-    
+
+    @Mock
+    private UserEmailRateLimiter userEmailRateLimiter;
+
     @Test
     void registerUserToAccount() {
         String roleCode = "roleCode";
@@ -110,8 +120,21 @@ class OperatorUserRegistrationServiceTest {
 		service.sendVerificationEmail(email);
 
 		// verify mocks
+		verify(userEmailRateLimiter, times(1)).consume(PmrvNotificationTemplateName.EMAIL_CONFIRMATION, email);
 		verify(operatorUserNotificationGateway, times(1)).notifyEmailVerification(email);
 	}
+
+    @Test
+    void sendVerificationEmail_too_many_requests() {
+        String email = "email";
+        doThrow(new BusinessException(MetsErrorCode.TOO_MANY_REQUESTS))
+            .when(userEmailRateLimiter).consume(PmrvNotificationTemplateName.EMAIL_CONFIRMATION, email);
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> service.sendVerificationEmail(email));
+        assertThat(ex.getErrorCode()).isEqualTo(MetsErrorCode.TOO_MANY_REQUESTS);
+
+        verifyNoInteractions(operatorUserNotificationGateway);
+    }
 
     private OperatorUserInvitationDTO createOperatorUserInvitationDTO(String roleCode) {
         return OperatorUserInvitationDTO.builder()

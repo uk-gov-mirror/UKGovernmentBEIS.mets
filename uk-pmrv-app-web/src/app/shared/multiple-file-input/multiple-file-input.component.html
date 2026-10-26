@@ -2,15 +2,28 @@
   <app-file-upload-list
     [listTitle]="listTitle"
     [headerSize]="headerSize"
+    [headingLevel]="headingLevel"
     (fileDelete)="onFileDeleteClick($event)"
     [files]="uploadedFiles$ | async"
     [isDisabled]="isDisabled"></app-file-upload-list>
 
   <div class="moj-multi-file-upload__upload">
     <div class="govuk-form-group">
-      <label [class]="'govuk-label govuk-label--' + headerSize" id="{{ 'l.' + id }}" [for]="id">{{ label }}</label>
+      @if (label) {
+        @switch (headingLevel) {
+          @case (3) {
+            <h3 [class]="'govuk-heading-' + headerSize" id="{{ 'l.' + id }}">{{ label }}</h3>
+          }
+          @case (4) {
+            <h4 [class]="'govuk-heading-' + headerSize" id="{{ 'l.' + id }}">{{ label }}</h4>
+          }
+          @default {
+            <h2 [class]="'govuk-heading-' + headerSize" id="{{ 'l.' + id }}">{{ label }}</h2>
+          }
+        }
+      }
 
-      <div class="govuk-hint">
+      <div [id]="id + '-hints'" class="govuk-hint">
         <ng-container *ngTemplateOutlet="customHintTemplate ? customHintTemplate : defaultHintTemplate"></ng-container>
       </div>
       <ng-template #defaultHintTemplate>
@@ -38,13 +51,25 @@
           [attr.aria-labelledby]="'l.' + id + ' ld.' + id"
           class="govuk-file-upload moj-multi-file-upload__input"
           multiple
+          tabindex="-1"
           type="file" />
         <p class="govuk-body">{{ dropzoneHintText }}</p>
+        <!-- Exposed as a link so speech recognition software (e.g. Dragon) can activate it, as file inputs cannot be targeted by voice -->
         <label
+          #trigger
+          (blur)="onTriggerBlur()"
+          (focus)="onTriggerFocus()"
+          (keydown.enter)="onTriggerKeydown($event)"
+          (keydown.space)="onTriggerKeydown($event)"
           [class.govuk-button--disabled]="isDisabled"
           [class.moj-multi-file-upload--focused]="isFocused"
           [for]="id"
+          [attr.tabindex]="isDisabled ? null : 0"
+          [attr.aria-disabled]="isDisabled || null"
+          [attr.aria-labelledby]="'l.' + id + ' ld.' + id"
+          [attr.aria-describedby]="id + '-hints'"
           id="{{ 'ld.' + id }}"
+          role="link"
           class="govuk-button govuk-button--secondary">
           {{ dropzoneButtonText }}
         </label>

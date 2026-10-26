@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { combineLatest, first, map, Observable, switchMap, takeUntil } from 'rxjs';
 
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
+
 import {
   AerApplicationSubmitRequestTaskPayload,
   CalculationNationalInventoryDataCalculationMethod,
@@ -44,11 +46,22 @@ export class BiomassCalculationComponent {
     }),
   );
 
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
+    }),
+  );
+
   constructor(
     @Inject(AER_CALCULATION_EMISSIONS_FORM) readonly form: UntypedFormGroup,
     readonly aerService: AerService,
     private readonly router: Router,
     readonly route: ActivatedRoute,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     readonly pendingRequest: PendingRequestService,
     private readonly destroy$: DestroySubject,
   ) {}

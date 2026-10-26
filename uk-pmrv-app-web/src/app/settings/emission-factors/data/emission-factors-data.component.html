@@ -1,0 +1,52 @@
+@if (vm(); as vm) {
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <div class="flex-space-between">
+        <app-page-heading caption="Emission factors" size="l">
+          Emission factors data for {{ vm.referenceYear }}
+        </app-page-heading>
+        @if (vm.canUpdate) {
+          <a govukSecondaryButton class="app-update-data-button" [routerLink]="['..', 'upload']">Update data</a>
+        }
+      </div>
+
+      <govuk-warning-text>Only data for the current reporting year can be updated.</govuk-warning-text>
+
+      <dl govuk-summary-list>
+        <div govukSummaryListRow>
+          <dt govukSummaryListRowKey>Uploaded file</dt>
+          <dd govukSummaryListRowValue>
+            <a govukLink [routerLink]="['..', 'file-download', vm.referenceYear]" target="_blank">{{ vm.fileName }}</a>
+          </dd>
+        </div>
+      </dl>
+
+      <h2 class="govuk-heading-m">Regional natural gas emission factors</h2>
+      <div class="overflow-auto overflow-auto-table govuk-!-margin-bottom-6">
+        <govuk-table [columns]="vm.regionalColumns" [data]="vm.regionalRows"></govuk-table>
+      </div>
+
+      <h2 class="govuk-heading-m">National inventory data criteria</h2>
+      <div class="overflow-auto overflow-auto-table">
+        <govuk-table [columns]="vm.nationalInventoryColumns" [data]="vm.nationalInventoryRows">
+          <ng-template let-column="column" let-row="row">
+            @switch (column.field) {
+              @case ('ncvMeasurementUnit') {
+                {{ vm.ncvUnitLabels[row.ncvMeasurementUnit] }}
+              }
+              @default {
+                {{ row[column.field] }}
+              }
+            }
+          </ng-template>
+        </govuk-table>
+      </div>
+
+      <p class="govuk-body govuk-!-margin-bottom-8">
+        Net calorific value data from the uploaded file has automatically been converted from MJ/m³ to GJ/m³
+      </p>
+
+      <p class="govuk-body"><a govukLink routerLink="..">Return to: Emission factors</a></p>
+    </div>
+  </div>
+}

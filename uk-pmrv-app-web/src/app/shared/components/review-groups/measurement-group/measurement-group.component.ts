@@ -68,7 +68,7 @@ export class MeasurementGroupComponent implements OnInit {
         const result = aerSourceStreams.find((sourceStream) => sourceStream.id === currentSourceStream);
 
         if (result?.reference) {
-          sourceStreams.push(result.reference + ' ' + sourceStreamDescriptionPipe.transform(result.description));
+          sourceStreams.push(result.reference + ' ' + sourceStreamDescriptionPipe.transform(result));
         }
       });
 

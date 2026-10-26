@@ -30,10 +30,11 @@
     <dd class="pre-wrap" govukSummaryListRowValue>
       {{ variationDetails?.reason }}
     </dd>
-    <dd></dd>
-    <dd govukSummaryListRowActions *ngIf="isEditable">
-      <a govukLink routerLink="../" [queryParams]="changeUrlQueryParams">Change</a>
-    </dd>
+    @if (isEditable) {
+      <dd govukSummaryListRowActions>
+        <a govukLink routerLink="../" [queryParams]="changeUrlQueryParams">Change</a>
+      </dd>
+    }
   </div>
 </dl>
 <ng-container *ngIf="variationRegulatorLedReason">
@@ -47,10 +48,11 @@
             : (variationRegulatorLedReason.type | empVariationDetailsReasonType)
         }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a govukLink routerLink="../reason" [queryParams]="changeUrlQueryParams">Change</a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a govukLink routerLink="../reason" [queryParams]="changeUrlQueryParams">Change</a>
+        </dd>
+      }
     </div>
   </dl>
 </ng-container>

@@ -408,3 +408,22 @@ export const mockState = {
   isEditable: true,
   user: undefined,
 } as CommonTasksState;
+
+export const mockAerApplyPayloadWithNonNegativeEmissions: AerApplicationSubmitRequestTaskPayload = {
+  ...mockAerApplyPayload,
+  aer: {
+    ...mockAerApplyPayload.aer,
+    monitoringApproachEmissions: {
+      ...mockAerApplyPayload.aer.monitoringApproachEmissions,
+      CALCULATION_CO2: {
+        ...mockAerApplyPayload.aer.monitoringApproachEmissions.CALCULATION_CO2,
+        sourceStreamEmissions: (
+          mockAerApplyPayload.aer.monitoringApproachEmissions.CALCULATION_CO2 as CalculationOfCO2Emissions
+        ).sourceStreamEmissions.map((sourceStreamEmission) => ({
+          ...sourceStreamEmission,
+          transfer: { ...sourceStreamEmission.transfer, transferDirection: 'RECEIVED_FROM_ANOTHER_INSTALLATION' },
+        })),
+      } as CalculationOfCO2Emissions,
+    },
+  },
+};

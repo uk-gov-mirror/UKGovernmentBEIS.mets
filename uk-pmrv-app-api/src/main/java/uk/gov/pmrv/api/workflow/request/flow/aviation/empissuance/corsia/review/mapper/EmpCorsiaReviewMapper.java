@@ -1,11 +1,5 @@
 package uk.gov.pmrv.api.workflow.request.flow.aviation.empissuance.corsia.review.mapper;
 
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -31,6 +25,13 @@ import uk.gov.pmrv.api.workflow.request.flow.common.domain.dto.RequestActionUser
 import uk.gov.pmrv.api.workflow.request.flow.common.domain.review.ChangesRequiredDecisionDetails;
 import uk.gov.pmrv.api.workflow.request.flow.common.domain.review.ReviewDecisionRequiredChange;
 
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @Mapper(componentModel = "spring", config = MapperConfig.class)
 public interface EmpCorsiaReviewMapper {
 
@@ -55,8 +56,12 @@ public interface EmpCorsiaReviewMapper {
         Map<String, RequestActionUserInfo> usersInfo, RequestActionPayloadType payloadType);
 
     @Mapping(target = "payloadType", source = "payloadType")
+    @Mapping(target = "serviceContactDetails", source = "accountInfo.serviceContactDetails")
     EmpIssuanceCorsiaApplicationDeemedWithdrawnRequestActionPayload toEmpIssuanceCorsiaApplicationDeemedWithdrawnRequestActionPayload(
-        EmpIssuanceCorsiaRequestPayload requestPayload, Map<String, RequestActionUserInfo> usersInfo, RequestActionPayloadType payloadType);
+        EmpIssuanceCorsiaRequestPayload requestPayload,
+        RequestAviationAccountInfo accountInfo,
+        Map<String, RequestActionUserInfo> usersInfo,
+        RequestActionPayloadType payloadType);
 
     @Mapping(target = "payloadType", source = "payloadType")
     @Mapping(target = "serviceContactDetails", source = "aviationAccountInfo.serviceContactDetails")

@@ -28,6 +28,14 @@ export class MonitoringPlanComponent {
     private readonly route: ActivatedRoute,
   ) {}
 
+  hint = `<p class="govuk-hint">Include all relevant changes in operations, for example:</p>
+  <ul class="govuk-list govuk-list--bullet govuk-hint">
+  <li>operational changes</li>
+  <li>changes that impacted the installation</li>
+  <li>temporary deviations during the reporting year</li>
+  <li>temporal or permanent changes of tiers</li>
+  </ul>`;
+
   monitoringPlanVersions$ = this.aerService
     .getPayload()
     .pipe(map((payload: AerApplicationSubmitRequestTaskPayload) => payload.monitoringPlanVersions));

@@ -142,6 +142,7 @@ export const mockRegulatorUser: {
       BULK_DOWNLOAD_BDRS2: 'NONE',
       MI_REPORTS_MANAGE_CUSTOM: 'NONE',
       SETTINGS_PAGE_FEES: 'NONE',
+      SETTINGS_PAGE_EMISSION_FACTORS: 'NONE',
     },
   },
 };
@@ -219,6 +220,7 @@ export const mockRegulatorRolePermissions = [
   'BULK_DOWNLOAD_BDRS2',
   'MI_REPORTS_MANAGE_CUSTOM',
   'SETTINGS_PAGE_FEES',
+  'SETTINGS_PAGE_EMISSION_FACTORS',
 ];
 
 export const mockRegulatorBasePermissions = [
@@ -298,6 +300,7 @@ export const mockRegulatorBasePermissions = [
       BULK_DOWNLOAD_BDRS2: 'NONE',
       MI_REPORTS_MANAGE_CUSTOM: 'NONE',
       SETTINGS_PAGE_FEES: 'NONE',
+      SETTINGS_PAGE_EMISSION_FACTORS: 'NONE',
     },
   },
   {
@@ -376,6 +379,7 @@ export const mockRegulatorBasePermissions = [
       BULK_DOWNLOAD_BDRS2: 'NONE',
       MI_REPORTS_MANAGE_CUSTOM: 'NONE',
       SETTINGS_PAGE_FEES: 'NONE',
+      SETTINGS_PAGE_EMISSION_FACTORS: 'NONE',
     },
   },
   {
@@ -454,6 +458,7 @@ export const mockRegulatorBasePermissions = [
       BULK_DOWNLOAD_BDRS2: 'NONE',
       MI_REPORTS_MANAGE_CUSTOM: 'EXECUTE',
       SETTINGS_PAGE_FEES: 'EXECUTE',
+      SETTINGS_PAGE_EMISSION_FACTORS: 'EXECUTE',
     },
   },
   {
@@ -532,6 +537,7 @@ export const mockRegulatorBasePermissions = [
       BULK_DOWNLOAD_BDRS2: 'NONE',
       MI_REPORTS_MANAGE_CUSTOM: 'EXECUTE',
       SETTINGS_PAGE_FEES: 'EXECUTE',
+      SETTINGS_PAGE_EMISSION_FACTORS: 'EXECUTE',
     },
   },
   {
@@ -610,6 +616,7 @@ export const mockRegulatorBasePermissions = [
       BULK_DOWNLOAD_BDRS2: 'NONE',
       MI_REPORTS_MANAGE_CUSTOM: 'NONE',
       SETTINGS_PAGE_FEES: 'NONE',
+      SETTINGS_PAGE_EMISSION_FACTORS: 'NONE',
     },
   },
 ];
@@ -687,4 +694,5 @@ export const mockRegulatorPermissionGroups = {
   BULK_DOWNLOAD_BDRS2: ['NONE', 'VIEW_ONLY', 'EXECUTE'],
   MI_REPORTS_MANAGE_CUSTOM: ['NONE', 'EXECUTE'],
   SETTINGS_PAGE_FEES: ['NONE', 'VIEW_ONLY', 'EXECUTE'],
+  SETTINGS_PAGE_EMISSION_FACTORS: ['NONE', 'VIEW_ONLY', 'EXECUTE'],
 };

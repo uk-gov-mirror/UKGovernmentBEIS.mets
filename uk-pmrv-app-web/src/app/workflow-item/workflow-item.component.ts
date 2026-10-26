@@ -21,7 +21,6 @@ import { BackLinkService } from '@shared/back-link/back-link.service';
 import { QuarterNamePipe } from '@shared/pipes/quarter-name.pipe';
 
 import {
-  RequestActionInfoDTO,
   RequestActionsService,
   RequestCreateActionProcessDTO,
   RequestItemsService,
@@ -82,7 +81,6 @@ export class WorkflowItemComponent extends WorkflowItemAbstractComponent impleme
 
   readonly actions$ = this.requestId$.pipe(
     switchMap((requestId) => this.requestActionsService.getRequestActionsByRequestId(requestId)),
-    map((res) => this.sortTimeline(res)),
     shareReplay({ bufferSize: 1, refCount: true }),
   );
 
@@ -187,10 +185,6 @@ export class WorkflowItemComponent extends WorkflowItemAbstractComponent impleme
       .subscribe((access: boolean) => {
         this.hasMarkAsNotRequiredAccess$.next(access);
       });
-  }
-
-  private sortTimeline(res: RequestActionInfoDTO[]): RequestActionInfoDTO[] {
-    return res.slice().sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
   }
 
   selectedTab(selected: string) {

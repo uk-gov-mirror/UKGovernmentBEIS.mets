@@ -4,7 +4,9 @@
       (formSubmit)="onContinue()"
       [formGroup]="form"
       heading="Calculate the activity data for this source stream"
+      [caption]="'Calculation of emissions, ' + (sourceStream$ | async)"
       [hideSubmit]="(isEditable$ | async) === false">
+      <app-activity-data-info></app-activity-data-info>
       @if (isSm3()) {
         <h2 class="govuk-heading-m govuk-!-margin-bottom-1">Measurement units applied</h2>
         <div class="govuk-body">Standard cubic metres (Sm3) at 15°C (metering conditions)</div>

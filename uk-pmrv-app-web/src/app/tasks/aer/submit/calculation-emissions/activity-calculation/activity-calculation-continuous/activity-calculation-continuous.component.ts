@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { combineLatest, filter, first, map, Observable, shareReplay, switchMap, takeUntil } from 'rxjs';
 
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
+
 import { GovukValidators } from 'govuk-components';
 
 import {
@@ -54,6 +56,16 @@ export class ActivityCalculationContinuousComponent {
     ),
   );
 
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
+    }),
+  );
+
   isSm3: Signal<boolean> = this.aerService.getIsSm3(this.index$);
 
   nationalInventoryData$ = this.nationalInventoryService.nationalInventoryData$;
@@ -97,6 +109,7 @@ export class ActivityCalculationContinuousComponent {
     readonly aerService: AerService,
     readonly nationalInventoryService: NationalInventoryService,
     readonly regionalInventoryService: RegionalInventoryService,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     private readonly router: Router,
     readonly route: ActivatedRoute,
     readonly pendingRequest: PendingRequestService,

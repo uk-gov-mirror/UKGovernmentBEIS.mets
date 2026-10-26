@@ -6,6 +6,7 @@ import { combineLatest, filter, first, map, Observable, of, shareReplay, startWi
 
 import { PendingRequestService } from '@core/guards/pending-request.service';
 import { DestroySubject } from '@core/services/destroy-subject.service';
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
 import { AerService } from '@tasks/aer/core/aer.service';
 import { getCompletionStatus } from '@tasks/aer/shared/components/submit/emissions-status';
 import BigNumber from 'bignumber.js';
@@ -57,6 +58,16 @@ export class ActivityCalculationAggregationComponent implements OnInit {
     ),
   );
 
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
+    }),
+  );
+
   isSm3: Signal<boolean> = this.aerService.getIsSm3(this.index$);
 
   nationalInventoryData$ = this.nationalInventoryService.nationalInventoryData$;
@@ -106,6 +117,7 @@ export class ActivityCalculationAggregationComponent implements OnInit {
     readonly nationalInventoryService: NationalInventoryService,
     readonly regionalInventoryService: RegionalInventoryService,
     private readonly router: Router,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     readonly route: ActivatedRoute,
     readonly pendingRequest: PendingRequestService,
     private readonly destroy$: DestroySubject,

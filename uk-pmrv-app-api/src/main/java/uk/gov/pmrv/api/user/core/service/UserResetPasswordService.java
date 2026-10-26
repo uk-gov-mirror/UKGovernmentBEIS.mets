@@ -30,8 +30,12 @@ public class UserResetPasswordService {
     private final JwtProperties jwtProperties;
     private final NotificationProperties notificationProperties;
 	private final JwtTokenService jwtTokenService;
+	private final UserEmailRateLimiter userEmailRateLimiter;
 
 	public void sendResetPasswordEmail(String email) {
+		// applied before the user lookup so that the response does not reveal whether the user exists
+		userEmailRateLimiter.consume(PmrvNotificationTemplateName.RESET_PASSWORD_REQUEST, email);
+
 		long expirationInMinutes = jwtProperties.getClaim().getResetPasswordExpIntervalMinutes();
 		Optional<UserInfoDTO> user = userAuthService.getUserByEmail(email);
 		

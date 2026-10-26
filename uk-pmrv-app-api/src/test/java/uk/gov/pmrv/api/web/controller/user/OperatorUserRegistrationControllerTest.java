@@ -17,6 +17,7 @@ import uk.gov.netz.api.authorization.core.domain.AppUser;
 import uk.gov.netz.api.common.exception.BusinessException;
 import uk.gov.netz.api.common.exception.ErrorCode;
 import uk.gov.netz.api.security.AppSecurityComponent;
+import uk.gov.pmrv.api.common.exception.MetsErrorCode;
 import uk.gov.pmrv.api.user.core.domain.dto.EmailDTO;
 import uk.gov.pmrv.api.user.core.domain.dto.InvitedUserCredentialsDTO;
 import uk.gov.pmrv.api.user.core.domain.dto.TokenDTO;
@@ -35,6 +36,7 @@ import uk.gov.pmrv.api.web.config.AppUserArgumentResolver;
 import uk.gov.pmrv.api.web.controller.exception.ExceptionControllerAdvice;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -98,6 +100,20 @@ class OperatorUserRegistrationControllerTest {
             	.andExpect(status().isNoContent());
         
         verify(operatorUserRegistrationService, times(1)).sendVerificationEmail(email);
+    }
+
+    @Test
+    void sendVerificationEmail_too_many_requests() throws Exception {
+        final String email = "email";
+        doThrow(new BusinessException(MetsErrorCode.TOO_MANY_REQUESTS))
+            .when(operatorUserRegistrationService).sendVerificationEmail(email);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post(USER_CONTROLLER_PATH + SEND_VERIFICATION_EMAIL_PATH)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(new EmailDTO(email))))
+            .andExpect(status().isTooManyRequests())
+            .andExpect(jsonPath("$.code").value(MetsErrorCode.TOO_MANY_REQUESTS.getCode()));
     }
 
     @Test

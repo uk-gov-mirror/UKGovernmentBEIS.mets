@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { combineLatest, first, map, switchMap } from 'rxjs';
+import { combineLatest, first, map, Observable, switchMap } from 'rxjs';
 
 import { PendingRequestService } from '@core/guards/pending-request.service';
 import { DestroySubject } from '@core/services/destroy-subject.service';
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
 
-import { CalculationOfCO2Emissions } from 'pmrv-api';
+import { CalculationOfCO2Emissions, CalculationSourceStreamEmission } from 'pmrv-api';
 
 import { AerService } from '../../../core/aer.service';
 import { areCalculationsTiersExtraConditionsMet } from '../../../shared/components/submit/emissions';
@@ -39,10 +40,28 @@ export class SummaryComponent {
     map((parameterMonitoringTiers) => areCalculationsTiersExtraConditionsMet(parameterMonitoringTiers)),
   );
 
+  sourceStreamEmission$: Observable<CalculationSourceStreamEmission> = combineLatest([this.payload$, this.index$]).pipe(
+    map(([payload, index]) => {
+      return (payload.aer.monitoringApproachEmissions.CALCULATION_CO2 as CalculationOfCO2Emissions)
+        ?.sourceStreamEmissions?.[index];
+    }),
+  );
+
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
+    }),
+  );
+
   constructor(
     readonly pendingRequest: PendingRequestService,
     private readonly aerService: AerService,
     private readonly router: Router,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     private readonly route: ActivatedRoute,
   ) {}
 

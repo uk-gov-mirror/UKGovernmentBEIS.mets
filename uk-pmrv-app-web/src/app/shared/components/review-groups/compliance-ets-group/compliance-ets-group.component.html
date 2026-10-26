@@ -3,12 +3,14 @@
     <dt govukSummaryListRowKey>Monitoring Plan requirements met?</dt>
     <dd govukSummaryListRowValue class="pre-wrap">
       <ng-container
-        *ngIf="etsComplianceRules.monitoringPlanRequirementsMet; else monitoringPlanRequirementsNotMetReason"
-        >Yes</ng-container
-      >
-      <ng-template #monitoringPlanRequirementsNotMetReason
-        >No<br />{{ etsComplianceRules.monitoringPlanRequirementsNotMetReason }}</ng-template
-      >
+        *ngIf="etsComplianceRules.monitoringPlanRequirementsMet; else monitoringPlanRequirementsNotMetReason">
+        Yes
+      </ng-container>
+      <ng-template #monitoringPlanRequirementsNotMetReason>
+        No
+        <br />
+        {{ etsComplianceRules.monitoringPlanRequirementsNotMetReason }}
+      </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
       <a govukLink routerLink="..">Change</a>
@@ -18,12 +20,14 @@
     <dt govukSummaryListRowKey>EU Regulation on Monitoring and reporting met?</dt>
     <dd govukSummaryListRowValue class="pre-wrap">
       <ng-container
-        *ngIf="etsComplianceRules.euRegulationMonitoringReportingMet; else euRegulationMonitoringReportingNotMetReason"
-        >Yes</ng-container
-      >
-      <ng-template #euRegulationMonitoringReportingNotMetReason
-        >No<br />{{ etsComplianceRules.euRegulationMonitoringReportingNotMetReason }}</ng-template
-      >
+        *ngIf="etsComplianceRules.euRegulationMonitoringReportingMet; else euRegulationMonitoringReportingNotMetReason">
+        Yes
+      </ng-container>
+      <ng-template #euRegulationMonitoringReportingNotMetReason>
+        No
+        <br />
+        {{ etsComplianceRules.euRegulationMonitoringReportingNotMetReason }}
+      </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
       <a govukLink routerLink="../regulation-monitoring-reporting">Change</a>
@@ -32,13 +36,22 @@
   <div govukSummaryListRow *ngIf="etsComplianceRules.detailSourceDataVerified !== undefined">
     <dt govukSummaryListRowKey>Data verified in detail and back to source</dt>
     <dd govukSummaryListRowValue class="pre-wrap">
-      <ng-container *ngIf="etsComplianceRules.detailSourceDataVerified; else detailSourceDataNotVerifiedReason"
-        >Yes<br />{{ etsComplianceRules.partOfSiteVerification }}</ng-container
-      >
-      <ng-template #detailSourceDataNotVerifiedReason
-        >No<br />{{ etsComplianceRules.detailSourceDataNotVerifiedReason }}</ng-template
-      >
+      <ng-container *ngIf="etsComplianceRules.detailSourceDataVerified; else detailSourceDataNotVerifiedReason">
+        Yes
+      </ng-container>
+      <ng-template #detailSourceDataNotVerifiedReason>
+        No
+        <br />
+        {{ etsComplianceRules.detailSourceDataNotVerifiedReason }}
+      </ng-template>
     </dd>
+    <dd govukSummaryListRowActions *ngIf="isEditable">
+      <a govukLink routerLink="../detail-source-data">Change</a>
+    </dd>
+  </div>
+  <div govukSummaryListRow *ngIf="etsComplianceRules.detailSourceDataVerified">
+    <dt govukSummaryListRowKey>Was this part of site verification?</dt>
+    <dd govukSummaryListRowValue class="pre-wrap">{{ etsComplianceRules.partOfSiteVerification }}</dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
       <a govukLink routerLink="../detail-source-data">Change</a>
     </dd>
@@ -48,12 +61,14 @@
       Control activities are documented, implemented, maintained and effective to mitigate the inherent risks?
     </dt>
     <dd govukSummaryListRowValue class="pre-wrap">
-      <ng-container *ngIf="etsComplianceRules.controlActivitiesDocumented; else controlActivitiesNotDocumentedReason"
-        >Yes</ng-container
-      >
-      <ng-template #controlActivitiesNotDocumentedReason
-        >No<br />{{ etsComplianceRules.controlActivitiesNotDocumentedReason }}</ng-template
-      >
+      <ng-container *ngIf="etsComplianceRules.controlActivitiesDocumented; else controlActivitiesNotDocumentedReason">
+        Yes
+      </ng-container>
+      <ng-template #controlActivitiesNotDocumentedReason>
+        No
+        <br />
+        {{ etsComplianceRules.controlActivitiesNotDocumentedReason }}
+      </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
       <a govukLink routerLink="../control-activities">Change</a>
@@ -66,12 +81,14 @@
     </dt>
     <dd govukSummaryListRowValue class="pre-wrap">
       <ng-container
-        *ngIf="etsComplianceRules.proceduresMonitoringPlanDocumented; else proceduresMonitoringPlanNotDocumentedReason"
-        >Yes</ng-container
-      >
-      <ng-template #proceduresMonitoringPlanNotDocumentedReason
-        >No<br />{{ etsComplianceRules.proceduresMonitoringPlanNotDocumentedReason }}</ng-template
-      >
+        *ngIf="etsComplianceRules.proceduresMonitoringPlanDocumented; else proceduresMonitoringPlanNotDocumentedReason">
+        Yes
+      </ng-container>
+      <ng-template #proceduresMonitoringPlanNotDocumentedReason>
+        No
+        <br />
+        {{ etsComplianceRules.proceduresMonitoringPlanNotDocumentedReason }}
+      </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
       <a govukLink routerLink="../monitoring-plan-procedures">Change</a>
@@ -80,12 +97,14 @@
   <div govukSummaryListRow *ngIf="etsComplianceRules.dataVerificationCompleted !== undefined">
     <dt govukSummaryListRowKey>Data verification completed as required?</dt>
     <dd govukSummaryListRowValue class="pre-wrap">
-      <ng-container *ngIf="etsComplianceRules.dataVerificationCompleted; else dataVerificationNotCompletedReason"
-        >Yes</ng-container
-      >
-      <ng-template #dataVerificationNotCompletedReason
-        >No<br />{{ etsComplianceRules.dataVerificationNotCompletedReason }}</ng-template
-      >
+      <ng-container *ngIf="etsComplianceRules.dataVerificationCompleted; else dataVerificationNotCompletedReason">
+        Yes
+      </ng-container>
+      <ng-template #dataVerificationNotCompletedReason>
+        No
+        <br />
+        {{ etsComplianceRules.dataVerificationNotCompletedReason }}
+      </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
       <a govukLink routerLink="../data-verification">Change</a>
@@ -95,12 +114,14 @@
     <dt govukSummaryListRowKey>Correct application of monitoring methodology?</dt>
     <dd govukSummaryListRowValue class="pre-wrap">
       <ng-container
-        *ngIf="etsComplianceRules.monitoringApproachAppliedCorrectly; else monitoringApproachNotAppliedCorrectlyReason"
-        >Yes</ng-container
-      >
-      <ng-template #monitoringApproachNotAppliedCorrectlyReason
-        >No<br />{{ etsComplianceRules.monitoringApproachNotAppliedCorrectlyReason }}</ng-template
-      >
+        *ngIf="etsComplianceRules.monitoringApproachAppliedCorrectly; else monitoringApproachNotAppliedCorrectlyReason">
+        Yes
+      </ng-container>
+      <ng-template #monitoringApproachNotAppliedCorrectlyReason>
+        No
+        <br />
+        {{ etsComplianceRules.monitoringApproachNotAppliedCorrectlyReason }}
+      </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
       <a govukLink routerLink="../monitoring-approach">Change</a>
@@ -109,12 +130,14 @@
   <div govukSummaryListRow *ngIf="etsComplianceRules.plannedActualChangesReported !== undefined">
     <dt govukSummaryListRowKey>Reporting of planned or actual changes?</dt>
     <dd govukSummaryListRowValue class="pre-wrap">
-      <ng-container *ngIf="etsComplianceRules.plannedActualChangesReported; else plannedActualChangesNotReportedReason"
-        >Yes</ng-container
-      >
-      <ng-template #plannedActualChangesNotReportedReason
-        >No<br />{{ etsComplianceRules.plannedActualChangesNotReportedReason }}</ng-template
-      >
+      <ng-container *ngIf="etsComplianceRules.plannedActualChangesReported; else plannedActualChangesNotReportedReason">
+        Yes
+      </ng-container>
+      <ng-template #plannedActualChangesNotReportedReason>
+        No
+        <br />
+        {{ etsComplianceRules.plannedActualChangesNotReportedReason }}
+      </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
       <a govukLink routerLink="../planned-changes">Change</a>
@@ -124,11 +147,13 @@
     <dt govukSummaryListRowKey>Verification of methods applied for missing data?</dt>
     <dd govukSummaryListRowValue class="pre-wrap">
       <ng-container
-        *ngIf="etsComplianceRules.methodsApplyingMissingDataUsed; else methodsApplyingMissingDataNotUsedReason"
-        >Yes
+        *ngIf="etsComplianceRules.methodsApplyingMissingDataUsed; else methodsApplyingMissingDataNotUsedReason">
+        Yes
       </ng-container>
       <ng-template #methodsApplyingMissingDataNotUsedReason>
-        No<br />{{ etsComplianceRules.methodsApplyingMissingDataNotUsedReason }}
+        No
+        <br />
+        {{ etsComplianceRules.methodsApplyingMissingDataNotUsedReason }}
       </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
@@ -138,11 +163,13 @@
   <div govukSummaryListRow *ngIf="etsComplianceRules.uncertaintyAssessment !== undefined">
     <dt govukSummaryListRowKey>Does the operator need to comply with uncertainty thresholds?</dt>
     <dd govukSummaryListRowValue class="pre-wrap">
-      <ng-container *ngIf="etsComplianceRules.uncertaintyAssessment; else uncertaintyAssessmentNotUsedReason"
-        >Yes
+      <ng-container *ngIf="etsComplianceRules.uncertaintyAssessment; else uncertaintyAssessmentNotUsedReason">
+        Yes
       </ng-container>
       <ng-template #uncertaintyAssessmentNotUsedReason>
-        No<br />{{ etsComplianceRules.uncertaintyAssessmentNotUsedReason }}
+        No
+        <br />
+        {{ etsComplianceRules.uncertaintyAssessmentNotUsedReason }}
       </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
@@ -153,12 +180,14 @@
     <dt govukSummaryListRowKey>Competent authority guidance on monitoring and reporting met?</dt>
     <dd govukSummaryListRowValue class="pre-wrap">
       <ng-container
-        *ngIf="etsComplianceRules.competentAuthorityGuidanceMet; else competentAuthorityGuidanceNotMetReason"
-        >Yes</ng-container
-      >
-      <ng-template #competentAuthorityGuidanceNotMetReason
-        >No<br />{{ etsComplianceRules.competentAuthorityGuidanceNotMetReason }}</ng-template
-      >
+        *ngIf="etsComplianceRules.competentAuthorityGuidanceMet; else competentAuthorityGuidanceNotMetReason">
+        Yes
+      </ng-container>
+      <ng-template #competentAuthorityGuidanceNotMetReason>
+        No
+        <br />
+        {{ etsComplianceRules.competentAuthorityGuidanceNotMetReason }}
+      </ng-template>
     </dd>
     <dd govukSummaryListRowActions *ngIf="isEditable">
       <a govukLink routerLink="../competent-authority-guidance">Change</a>

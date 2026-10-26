@@ -37,6 +37,14 @@ describe('CalculationEmissionsComponent', () => {
       );
     }
 
+    get errorSummary() {
+      return this.query<HTMLDivElement>('.govuk-error-summary');
+    }
+
+    get errorSummaryListContents() {
+      return Array.from(this.errorSummary.querySelectorAll('li')).map((item) => item.textContent.trim());
+    }
+
     get tables() {
       return this.queryAll<HTMLTableElement>('govuk-table');
     }
@@ -79,7 +87,7 @@ describe('CalculationEmissionsComponent', () => {
     });
 
     it('should display "Calculation emissions" as a heading', async () => {
-      expect(page.heading.textContent.trim()).toEqual('Calculation emissions');
+      expect(page.heading.textContent.trim()).toEqual('Calculation  emissions');
     });
 
     it('should display "add a source stream" button and hide "add another entry" button', async () => {
@@ -118,6 +126,31 @@ describe('CalculationEmissionsComponent', () => {
         ['the reference Anthracite', 'emission source 1 reference', '-18', '0', 'Completed'],
         ['Total emissions', '', '-18 tCO2e', '0 tCO2e', ''],
       ]);
+    });
+
+    it('should display an error summary when total emissions are negative', () => {
+      expect(page.errorSummary).toBeTruthy();
+      expect(page.errorSummaryListContents).toEqual(['The total emissions should be greater than or equal to 0']);
+    });
+  });
+
+  describe('for non negative total emissions', () => {
+    beforeEach(() => {
+      const state = JSON.parse(JSON.stringify(mockState));
+      state.requestTaskItem.requestTask.payload.aer.monitoringApproachEmissions.CALCULATION_CO2.sourceStreamEmissions[0].transfer.transferDirection =
+        'RECEIVED_FROM_ANOTHER_INSTALLATION';
+
+      store = TestBed.inject(CommonTasksStore);
+      store.setState(state);
+    });
+
+    beforeEach(() => {
+      createComponent();
+    });
+
+    it('should not display an error summary', () => {
+      expect(page.rows[1]).toEqual(['Total emissions', '', '18 tCO2e', '0 tCO2e', '']);
+      expect(page.errorSummary).toBeFalsy();
     });
   });
 });

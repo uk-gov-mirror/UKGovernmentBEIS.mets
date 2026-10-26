@@ -4,14 +4,29 @@
     (fileDelete)="onFileDeleteClick()"
     [files]="uploadedFiles$ | async"
     [isDisabled]="isDisabled"
-    [headerSize]="headerSize"></app-file-upload-list>
+    [headerSize]="headerSize"
+    [headingLevel]="headingLevel"></app-file-upload-list>
   <div aria-live="assertive" class="govuk-visually-hidden" role="alert">{{ uploadErrorText$ | async }}</div>
 
-  <label [for]="id" id="{{ 'l.' + id }}" [class]="'govuk-label' + (headerSize ? ' govuk-label--' + headerSize : '')">
-    {{ label }}
-  </label>
+  @if (headerSize) {
+    @if (label) {
+      @switch (headingLevel) {
+        @case (3) {
+          <h3 [class]="'govuk-heading-' + headerSize" id="{{ 'l.' + id }}">{{ label }}</h3>
+        }
+        @case (4) {
+          <h4 [class]="'govuk-heading-' + headerSize" id="{{ 'l.' + id }}">{{ label }}</h4>
+        }
+        @default {
+          <h2 [class]="'govuk-heading-' + headerSize" id="{{ 'l.' + id }}">{{ label }}</h2>
+        }
+      }
+    }
+  } @else {
+    <label [for]="id" id="{{ 'l.' + id }}" class="govuk-label">{{ label }}</label>
+  }
   <span *ngIf="text" class="govuk-body">{{ text }}</span>
-  <div class="govuk-hint">
+  <div [id]="id + '-hints'" class="govuk-hint">
     <ng-container *ngTemplateOutlet="customHintTemplate ? customHintTemplate : defaultHintTemplate"></ng-container>
   </div>
   <ng-template #defaultHintTemplate>
@@ -22,15 +37,39 @@
     <span *ngIf="hint" [id]="id + '-hint'" class="govuk-hint">{{ hint }}</span>
   </ng-template>
   <govuk-error-message *ngIf="shouldDisplayErrors" [errors]="control.errors" [identifier]="id"></govuk-error-message>
-  <input
-    #input
-    (blur)="onFileBlur()"
-    (change)="onFileChange($event)"
-    [accept]="accepted"
-    [class.govuk-file-upload--error]="shouldDisplayErrors"
-    [disabled]="isDisabled"
-    [id]="id"
-    [name]="id"
-    class="govuk-file-upload"
-    type="file" />
+  <div class="app-file-input__control">
+    <input
+      #input
+      (blur)="onFileBlur()"
+      (change)="onFileChange($event)"
+      (focus)="onFileFocus()"
+      [accept]="accepted"
+      [disabled]="isDisabled"
+      [id]="id"
+      [name]="id"
+      [attr.aria-labelledby]="(label ? 'l.' + id + ' ' : '') + 'ld.' + id"
+      class="govuk-file-upload"
+      tabindex="-1"
+      type="file" />
+    <!-- Exposed as a link so speech recognition software (e.g. Dragon) can activate it, as file inputs cannot be targeted by voice -->
+    <label
+      #trigger
+      (blur)="onTriggerBlur()"
+      (focus)="onTriggerFocus()"
+      (keydown.enter)="onTriggerKeydown($event)"
+      (keydown.space)="onTriggerKeydown($event)"
+      [class.govuk-button--disabled]="isDisabled"
+      [class.moj-multi-file-upload--focused]="isFocused"
+      [class.app-file-input__trigger--error]="shouldDisplayErrors"
+      [for]="id"
+      [attr.tabindex]="isDisabled ? null : 0"
+      [attr.aria-disabled]="isDisabled || null"
+      [attr.aria-labelledby]="(label ? 'l.' + id + ' ' : '') + 'ld.' + id"
+      [attr.aria-describedby]="id + '-hints' + (shouldDisplayErrors ? ' ' + id + '-error' : '')"
+      id="{{ 'ld.' + id }}"
+      role="link"
+      class="govuk-button govuk-button--secondary govuk-!-margin-bottom-0">
+      {{ buttonText }}
+    </label>
+  </div>
 </div>

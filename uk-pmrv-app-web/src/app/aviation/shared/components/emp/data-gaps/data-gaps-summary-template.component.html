@@ -8,10 +8,11 @@
       <dd class="pre-wrap" govukSummaryListRowValue>
         {{ data.dataGaps }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a govukLink routerLink="../" [queryParams]="{ change: true }">Change</a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a govukLink routerLink="../" [queryParams]="{ change: true }">Change</a>
+        </dd>
+      }
     </div>
 
     <div govukSummaryListRow>
@@ -19,10 +20,11 @@
       <dd class="pre-wrap" govukSummaryListRowValue>
         {{ data.secondaryDataSources }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a govukLink routerLink="../secondary-data-sources" [queryParams]="{ change: true }">Change</a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a govukLink routerLink="../secondary-data-sources" [queryParams]="{ change: true }">Change</a>
+        </dd>
+      }
     </div>
 
     <div govukSummaryListRow>
@@ -30,21 +32,22 @@
       <dd class="pre-wrap" govukSummaryListRowValue>
         {{ data.substituteData }}
       </dd>
-      <dd></dd>
-
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a govukLink routerLink="../substitute-data" [queryParams]="{ change: true }">Change</a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a govukLink routerLink="../substitute-data" [queryParams]="{ change: true }">Change</a>
+        </dd>
+      }
     </div>
     <div govukSummaryListRow *ngIf="data.otherDataGapsTypes">
       <dt govukSummaryListRowKey>Data gaps for parameters other than fuel consumption</dt>
       <dd class="pre-wrap" govukSummaryListRowValue>
         {{ data.otherDataGapsTypes }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a govukLink routerLink="../other-data-gaps-types" [queryParams]="{ change: true }">Change</a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a govukLink routerLink="../other-data-gaps-types" [queryParams]="{ change: true }">Change</a>
+        </dd>
+      }
     </div>
   </dl>
 </div>

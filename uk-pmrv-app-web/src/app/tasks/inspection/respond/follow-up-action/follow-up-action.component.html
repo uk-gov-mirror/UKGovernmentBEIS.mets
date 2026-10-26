@@ -22,6 +22,7 @@
           <div formControlName="completionDate" govuk-date-input [isRequired]="true"></div>
 
           <app-multiple-file-input
+            headingLevel="3"
             class="govuk-button-group govuk-!-margin-top-8"
             [baseDownloadUrl]="getDownloadUrl()"
             label="Upload files (optional)"
@@ -41,6 +42,7 @@
             hint="This will be sent to the regulator"></div>
 
           <app-multiple-file-input
+            headingLevel="3"
             class="govuk-button-group govuk-!-margin-top-8"
             [baseDownloadUrl]="getDownloadUrl()"
             label="Upload files (optional)"

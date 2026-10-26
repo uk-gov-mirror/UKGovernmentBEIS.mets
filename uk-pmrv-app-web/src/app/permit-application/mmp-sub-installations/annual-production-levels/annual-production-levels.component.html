@@ -145,6 +145,7 @@
       <div formControlName="trackingMethodologyDescription" govuk-textarea [maxLength]="10000" rows="10"></div>
 
       <app-multiple-file-input
+        headingLevel="3"
         [baseDownloadUrl]="getDownloadUrl()"
         label="Upload supporting files (optional)"
         formControlName="supportingFiles"

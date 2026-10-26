@@ -76,7 +76,7 @@ describe('ExternalContactsComponent', () => {
       indexes.map((index) => [
         caExternalContacts.caExternalContacts[index].email,
         caExternalContacts.caExternalContacts[index].description,
-        'Delete',
+        `Delete ${caExternalContacts.caExternalContacts[index].name}`,
       ]),
     );
   };

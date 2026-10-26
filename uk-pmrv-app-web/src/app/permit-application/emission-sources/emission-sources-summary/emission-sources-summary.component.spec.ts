@@ -59,7 +59,7 @@ describe('EmissionSourcesSummaryComponent', () => {
   });
 
   it('should display the list of data', () => {
-    expect(page.emissionSources).toEqual([[], ['S1', 'Boiler', '', ''], ['S2', 'Boiler 2', '', '']]);
+    expect(page.emissionSources).toEqual([[], ['S1', 'Boiler', ''], ['S2', 'Boiler 2', '']]);
   });
 
   it('should display the notification banner', () => {

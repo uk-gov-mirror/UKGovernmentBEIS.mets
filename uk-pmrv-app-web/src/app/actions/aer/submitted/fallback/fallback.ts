@@ -5,6 +5,6 @@ export function getFallbackSourceStreams(payload, fallbackEmissions) {
   return fallbackEmissions?.sourceStreams.map((sourceStreamKey) => {
     const aerSourceStream = payload.aer.sourceStreams.find((sourceStream) => sourceStream.id === sourceStreamKey);
 
-    return `${aerSourceStream.reference} ${sourceStreamDescriptionPipe.transform(aerSourceStream.description)}`;
+    return `${aerSourceStream.reference} ${sourceStreamDescriptionPipe.transform(aerSourceStream)}`;
   });
 }

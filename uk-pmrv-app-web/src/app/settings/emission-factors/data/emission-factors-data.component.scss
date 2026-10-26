@@ -1,0 +1,8 @@
+@use 'govuk-frontend/dist/govuk/base' as govuk;
+
+// The heading starts with a caption, so align the button with the title line instead of the caption.
+.app-update-data-button {
+  @include govuk.govuk-media-query($from: tablet) {
+    align-self: flex-end;
+  }
+}

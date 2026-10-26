@@ -12,7 +12,7 @@
 
 export interface InlineObject6 {
   /**
-   * The document template source file
+   * The emission factors xlsx file
    */
-  file: Blob;
+  file?: Blob;
 }

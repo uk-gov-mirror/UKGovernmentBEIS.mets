@@ -1,4 +1,4 @@
-export type HttpStatus = 200 | 201 | 400 | 401 | 403 | 404 | 409 | 500;
+export type HttpStatus = 200 | 201 | 400 | 401 | 403 | 404 | 409 | 429 | 500;
 
 export class HttpStatuses {
   static Ok = 200;
@@ -8,5 +8,6 @@ export class HttpStatuses {
   static Forbidden = 403;
   static NotFound = 404;
   static Conflict = 409;
+  static TooManyRequests = 429;
   static InternalServerError = 500;
 }

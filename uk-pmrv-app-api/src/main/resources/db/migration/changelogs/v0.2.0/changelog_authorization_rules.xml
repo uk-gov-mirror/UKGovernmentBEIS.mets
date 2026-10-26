@@ -26853,4 +26853,352 @@
             </sql>
         </rollback>
     </changeSet>
+
+    <changeSet id="0_2_0_settings_page_emission_factors_authorization_rules" author="vasileios.vitzilaios@keyes.eu">
+        <sql>
+            insert into au_rule(id, resource_type, resource_sub_type, handler, role_type, scope)
+            values (nextval('au_rule_seq'), 'CA', null, 'caAccessHandler', 'REGULATOR', 'SETTINGS_PAGE_EMISSION_FACTORS_VIEW');
+
+            insert into au_rule(id, resource_type, resource_sub_type, handler, role_type, scope)
+            values (nextval('au_rule_seq'), 'CA', null, 'caAccessHandler', 'REGULATOR', 'SETTINGS_PAGE_EMISSION_FACTORS_EXECUTE');
+
+            insert into au_resource_scope_permission(id, resource_type, resource_sub_type, scope, permission, role_type)
+            (select nextval('au_resource_scope_permission_seq'), 'CA', null,
+                    'SETTINGS_PAGE_EMISSION_FACTORS_VIEW', 'PERM_SETTINGS_PAGE_EMISSION_FACTORS_VIEW_TASK', 'REGULATOR');
+
+            insert into au_resource_scope_permission(id, resource_type, resource_sub_type, scope, permission, role_type)
+            (select nextval('au_resource_scope_permission_seq'), 'CA', null,
+                    'SETTINGS_PAGE_EMISSION_FACTORS_EXECUTE', 'PERM_SETTINGS_PAGE_EMISSION_FACTORS_EXECUTE_TASK', 'REGULATOR');
+        </sql>
+        <rollback>
+            <sql>
+                delete from au_resource_scope_permission
+                where resource_type = 'CA'
+                  and resource_sub_type is null
+                  and scope in ('SETTINGS_PAGE_EMISSION_FACTORS_VIEW', 'SETTINGS_PAGE_EMISSION_FACTORS_EXECUTE')
+                  and role_type = 'REGULATOR';
+
+                delete from au_rule
+                where resource_type = 'CA'
+                  and resource_sub_type is null
+                  and handler = 'caAccessHandler'
+                  and role_type = 'REGULATOR'
+                  and scope in ('SETTINGS_PAGE_EMISSION_FACTORS_VIEW', 'SETTINGS_PAGE_EMISSION_FACTORS_EXECUTE');
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="0_2_0_settings_page_emission_factors_service_rules" author="vasileios.vitzilaios@keyes.eu">
+        <sql>
+            insert into au_service(id, name)
+            values (nextval('au_service_seq'), 'getEmissionFactors'),
+                   (nextval('au_service_seq'), 'generateGetEmissionFactorsFileToken'),
+                   (nextval('au_service_seq'), 'uploadEmissionFactors');
+
+            insert into au_service_rule(service_id, rule_id)
+            select s.id, r.id
+            from au_service s
+                     cross join au_rule r
+            where s.name in ('getEmissionFactors', 'generateGetEmissionFactorsFileToken')
+              and r.resource_type = 'CA'
+              and r.resource_sub_type is null
+              and r.handler = 'caAccessHandler'
+              and r.role_type = 'REGULATOR'
+              and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_VIEW';
+
+            insert into au_service_rule(service_id, rule_id)
+            select s.id, r.id
+            from au_service s
+                     cross join au_rule r
+            where s.name in ('uploadEmissionFactors')
+              and r.resource_type = 'CA'
+              and r.resource_sub_type is null
+              and r.handler = 'caAccessHandler'
+              and r.role_type = 'REGULATOR'
+              and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_EXECUTE';
+        </sql>
+        <rollback>
+            <sql>
+                delete from au_service_rule sr
+                using au_rule r, au_service s
+                where r.id = sr.rule_id
+                  and s.id = sr.service_id
+                  and s.name in ('getEmissionFactors', 'generateGetEmissionFactorsFileToken')
+                  and r.resource_type = 'CA'
+                  and r.resource_sub_type is null
+                  and r.handler = 'caAccessHandler'
+                  and r.role_type = 'REGULATOR'
+                  and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_VIEW';
+
+                delete from au_service_rule sr
+                using au_rule r, au_service s
+                where r.id = sr.rule_id
+                  and s.id = sr.service_id
+                  and s.name in ('uploadEmissionFactors')
+                  and r.resource_type = 'CA'
+                  and r.resource_sub_type is null
+                  and r.handler = 'caAccessHandler'
+                  and r.role_type = 'REGULATOR'
+                  and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_EXECUTE';
+
+                delete from au_service
+                where name in ('getEmissionFactors', 'generateGetEmissionFactorsFileToken', 'uploadEmissionFactors');
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="0_2_0_settings_page_emission_factors_detail_service_rule" author="vasileios.vitzilaios@keyes.eu">
+        <sql>
+            insert into au_service(id, name)
+            values (nextval('au_service_seq'), 'getEmissionFactorsDetail');
+
+            insert into au_service_rule(service_id, rule_id)
+            select s.id, r.id
+            from au_service s
+                     cross join au_rule r
+            where s.name = 'getEmissionFactorsDetail'
+              and r.resource_type = 'CA'
+              and r.resource_sub_type is null
+              and r.handler = 'caAccessHandler'
+              and r.role_type = 'REGULATOR'
+              and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_VIEW';
+        </sql>
+        <rollback>
+            <sql>
+                delete from au_service_rule sr
+                using au_rule r, au_service s
+                where r.id = sr.rule_id
+                  and s.id = sr.service_id
+                  and s.name = 'getEmissionFactorsDetail'
+                  and r.resource_type = 'CA'
+                  and r.resource_sub_type is null
+                  and r.handler = 'caAccessHandler'
+                  and r.role_type = 'REGULATOR'
+                  and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_VIEW';
+
+                delete from au_service
+                where name = 'getEmissionFactorsDetail';
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="0_2_0_settings_page_emission_factors_submit_service_rule" author="vasileios.vitzilaios@keyes.eu">
+        <sql>
+            insert into au_service(id, name)
+            values (nextval('au_service_seq'), 'submitEmissionFactors');
+
+            insert into au_service_rule(service_id, rule_id)
+            select s.id, r.id
+            from au_service s
+                     cross join au_rule r
+            where s.name = 'submitEmissionFactors'
+              and r.resource_type = 'CA'
+              and r.resource_sub_type is null
+              and r.handler = 'caAccessHandler'
+              and r.role_type = 'REGULATOR'
+              and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_EXECUTE';
+        </sql>
+        <rollback>
+            <sql>
+                delete from au_service_rule sr
+                using au_rule r, au_service s
+                where r.id = sr.rule_id
+                  and s.id = sr.service_id
+                  and s.name = 'submitEmissionFactors'
+                  and r.resource_type = 'CA'
+                  and r.resource_sub_type is null
+                  and r.handler = 'caAccessHandler'
+                  and r.role_type = 'REGULATOR'
+                  and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_EXECUTE';
+
+                delete from au_service
+                where name = 'submitEmissionFactors';
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="0_2_0_create_rule_installation_registry_integration_timeline_operator_access" author="mitzelose@unisystems.gr">
+        <sql>
+            insert into au_rule(id, resource_type, resource_sub_type, handler, role_type)
+            values (nextval('au_rule_seq'), 'REQUEST_ACTION', 'PERMIT_ISSUANCE_ACCOUNT_CREATED_SENT_TO_REGISTRY', 'requestActionViewHandler', 'OPERATOR'),
+                   (nextval('au_rule_seq'), 'REQUEST_ACTION', 'PERMIT_VARIATION_ACCOUNT_UPDATED_SENT_TO_REGISTRY', 'requestActionViewHandler', 'OPERATOR'),
+                   (nextval('au_rule_seq'), 'REQUEST_ACTION', 'INSTALLATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY', 'requestActionViewHandler', 'OPERATOR'),
+                   (nextval('au_rule_seq'), 'REQUEST_ACTION', 'WITHHOLDING_OF_ALLOWANCES_SENT_TO_REGISTRY', 'requestActionViewHandler', 'OPERATOR'),
+                   (nextval('au_rule_seq'), 'REQUEST_ACTION', 'NOTIFICATION_SENT_TO_REGISTRY', 'requestActionViewHandler', 'OPERATOR'),
+                   (nextval('au_rule_seq'), 'REQUEST_ACTION', 'RETURN_OF_ALLOWANCES_NOTIFICATION_SENT_TO_REGISTRY', 'requestActionViewHandler', 'OPERATOR');
+
+            insert into au_service_rule(service_id, rule_id)
+            select s.id, r.id
+            from au_service s
+                     cross join au_rule r
+            where s.name in ('getRequestActionById', 'generateRequestActionGetFileAttachmentToken', 'generateRequestActionGetFileDocumentToken')
+              and r.resource_type = 'REQUEST_ACTION'
+              and r.resource_sub_type in ('PERMIT_ISSUANCE_ACCOUNT_CREATED_SENT_TO_REGISTRY',
+                                          'PERMIT_VARIATION_ACCOUNT_UPDATED_SENT_TO_REGISTRY',
+                                          'INSTALLATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY',
+                                          'WITHHOLDING_OF_ALLOWANCES_SENT_TO_REGISTRY',
+                                          'NOTIFICATION_SENT_TO_REGISTRY',
+                                          'RETURN_OF_ALLOWANCES_NOTIFICATION_SENT_TO_REGISTRY')
+              and r.handler = 'requestActionViewHandler'
+              and r.role_type = 'OPERATOR'
+              and r.scope is null;
+        </sql>
+        <rollback>
+            <sql>
+                delete from au_service_rule
+                where rule_id in (
+                select r.id
+                from au_rule r
+                where r.resource_type = 'REQUEST_ACTION'
+                and r.resource_sub_type in ('PERMIT_ISSUANCE_ACCOUNT_CREATED_SENT_TO_REGISTRY',
+                'PERMIT_VARIATION_ACCOUNT_UPDATED_SENT_TO_REGISTRY',
+                'INSTALLATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY',
+                'WITHHOLDING_OF_ALLOWANCES_SENT_TO_REGISTRY',
+                'NOTIFICATION_SENT_TO_REGISTRY',
+                'RETURN_OF_ALLOWANCES_NOTIFICATION_SENT_TO_REGISTRY')
+                and r.handler = 'requestActionViewHandler'
+                and r.role_type = 'OPERATOR'
+                and r.scope is null);
+
+                delete from au_rule
+                where resource_type = 'REQUEST_ACTION'
+                and resource_sub_type in ('PERMIT_ISSUANCE_ACCOUNT_CREATED_SENT_TO_REGISTRY',
+                'PERMIT_VARIATION_ACCOUNT_UPDATED_SENT_TO_REGISTRY',
+                'INSTALLATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY',
+                'WITHHOLDING_OF_ALLOWANCES_SENT_TO_REGISTRY',
+                'NOTIFICATION_SENT_TO_REGISTRY',
+                'RETURN_OF_ALLOWANCES_NOTIFICATION_SENT_TO_REGISTRY')
+                and handler = 'requestActionViewHandler'
+                and role_type = 'OPERATOR'
+                and scope is null;
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="0_2_0_create_rule_aviation_registry_integration_timeline_operator_access" author="mitzelose@unisystems.gr">
+        <sql>
+            insert into au_rule(id, resource_type, resource_sub_type, handler, role_type)
+            values (nextval('au_rule_seq'), 'REQUEST_ACTION', 'EMP_ISSUANCE_UKETS_ACCOUNT_CREATED_SENT_TO_REGISTRY', 'requestActionViewHandler', 'OPERATOR'),
+                   (nextval('au_rule_seq'), 'REQUEST_ACTION', 'EMP_VARIATION_ACCOUNT_UPDATED_SENT_TO_REGISTRY', 'requestActionViewHandler', 'OPERATOR'),
+                   (nextval('au_rule_seq'), 'REQUEST_ACTION', 'AVIATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY', 'requestActionViewHandler', 'OPERATOR');
+
+            insert into au_service_rule(service_id, rule_id)
+            select s.id, r.id
+            from au_service s
+                     cross join au_rule r
+            where s.name in ('getRequestActionById', 'generateRequestActionGetFileAttachmentToken', 'generateRequestActionGetFileDocumentToken')
+              and r.resource_type = 'REQUEST_ACTION'
+              and r.resource_sub_type in ('EMP_ISSUANCE_UKETS_ACCOUNT_CREATED_SENT_TO_REGISTRY',
+                                          'EMP_VARIATION_ACCOUNT_UPDATED_SENT_TO_REGISTRY',
+                                          'AVIATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY')
+              and r.handler = 'requestActionViewHandler'
+              and r.role_type = 'OPERATOR'
+              and r.scope is null;
+        </sql>
+        <rollback>
+            <sql>
+                delete from au_service_rule
+                where rule_id in (
+                select r.id
+                from au_rule r
+                where r.resource_type = 'REQUEST_ACTION'
+                and r.resource_sub_type in ('EMP_ISSUANCE_UKETS_ACCOUNT_CREATED_SENT_TO_REGISTRY',
+                'EMP_VARIATION_ACCOUNT_UPDATED_SENT_TO_REGISTRY',
+                'AVIATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY')
+                and r.handler = 'requestActionViewHandler'
+                and r.role_type = 'OPERATOR'
+                and r.scope is null);
+
+                delete from au_rule
+                where resource_type = 'REQUEST_ACTION'
+                and resource_sub_type in ('EMP_ISSUANCE_UKETS_ACCOUNT_CREATED_SENT_TO_REGISTRY',
+                'EMP_VARIATION_ACCOUNT_UPDATED_SENT_TO_REGISTRY',
+                'AVIATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY')
+                and handler = 'requestActionViewHandler'
+                and role_type = 'OPERATOR'
+                and scope is null;
+            </sql>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="0_2_0_settings_page_emission_factors_history_service_rule" author="vasileios.vitzilaios@keyes.eu">
+        <sql>
+            insert into au_service(id, name)
+            values (nextval('au_service_seq'), 'getEmissionFactorsHistory');
+
+            insert into au_service_rule(service_id, rule_id)
+            select s.id, r.id
+            from au_service s
+                     cross join au_rule r
+            where s.name = 'getEmissionFactorsHistory'
+              and r.resource_type = 'CA'
+              and r.resource_sub_type is null
+              and r.handler = 'caAccessHandler'
+              and r.role_type = 'REGULATOR'
+              and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_VIEW';
+        </sql>
+        <rollback>
+            <sql>
+                delete from au_service_rule sr
+                using au_rule r, au_service s
+                where r.id = sr.rule_id
+                  and s.id = sr.service_id
+                  and s.name = 'getEmissionFactorsHistory'
+                  and r.resource_type = 'CA'
+                  and r.resource_sub_type is null
+                  and r.handler = 'caAccessHandler'
+                  and r.role_type = 'REGULATOR'
+                  and r.scope = 'SETTINGS_PAGE_EMISSION_FACTORS_VIEW';
+
+                delete from au_service
+                where name = 'getEmissionFactorsHistory';
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="0_2_0_alr_peer_review_file_download_authorization_rules" author="mitzelose@unisystems.gr">
+        <sql>
+            insert into au_service_rule(service_id, rule_id)
+            select s.id, r.id
+            from au_service s
+                     cross join au_rule r
+            where s.name in ('generateRequestTaskGetFileAttachmentToken')
+              and r.resource_type = 'REQUEST_TASK'
+              and r.resource_sub_type = 'ALR_APPLICATION_PEER_REVIEW'
+              and r.handler = 'requestTaskAccessHandler'
+              and r.role_type = 'REGULATOR'
+              and r.scope = 'REQUEST_TASK_VIEW';
+
+            insert into au_service_rule(service_id, rule_id)
+            select s.id, r.id
+            from au_service s
+                     cross join au_rule r
+            where s.name in ('generateRequestTaskGetFileAttachmentToken')
+              and r.resource_type = 'REQUEST_TASK'
+              and r.resource_sub_type = 'ALR_WAIT_FOR_PEER_REVIEW'
+              and r.handler = 'requestTaskAccessHandler'
+              and r.role_type = 'REGULATOR'
+              and r.scope = 'REQUEST_TASK_VIEW';
+        </sql>
+        <rollback>
+            delete from au_service_rule sr
+            using au_rule r, au_service s
+            where r.id = sr.rule_id
+              and s.id = sr.service_id
+              and s.name in ('generateRequestTaskGetFileAttachmentToken')
+              and r.resource_type = 'REQUEST_TASK'
+              and r.resource_sub_type = 'ALR_APPLICATION_PEER_REVIEW'
+              and r.handler = 'requestTaskAccessHandler'
+              and r.role_type = 'REGULATOR'
+              and r.scope = 'REQUEST_TASK_VIEW';
+
+            delete from au_service_rule sr
+            using au_rule r, au_service s
+            where r.id = sr.rule_id
+              and s.id = sr.service_id
+              and s.name in ('generateRequestTaskGetFileAttachmentToken')
+              and r.resource_type = 'REQUEST_TASK'
+              and r.resource_sub_type = 'ALR_WAIT_FOR_PEER_REVIEW'
+              and r.handler = 'requestTaskAccessHandler'
+              and r.role_type = 'REGULATOR'
+              and r.scope = 'REQUEST_TASK_VIEW';
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

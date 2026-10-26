@@ -1,5 +1,17 @@
 <div [hidden]="files?.length === 0" class="moj-multi-file__uploaded-files">
-  <h2 *ngIf="listTitle" [class]="'govuk-heading-' + headerSize">{{ listTitle }}</h2>
+  @if (listTitle) {
+    @switch (headingLevel) {
+      @case (3) {
+        <h3 [class]="'govuk-heading-' + headerSize">{{ listTitle }}</h3>
+      }
+      @case (4) {
+        <h4 [class]="'govuk-heading-' + headerSize">{{ listTitle }}</h4>
+      }
+      @default {
+        <h2 [class]="'govuk-heading-' + headerSize">{{ listTitle }}</h2>
+      }
+    }
+  }
 
   <ng-container *ngIf="files?.length > 0">
     <div *ngIf="files.length === 1; else multiple_files" class="govuk-summary-list moj-multi-file-upload__list">

@@ -7,7 +7,11 @@ import { firstValueFrom, Observable } from 'rxjs';
 
 import { getAvailableSections } from '@tasks/aer/core/aer-task-statuses';
 import { SendReportGuard } from '@tasks/aer/submit/send-report/send-report.guard';
-import { mockAerApplyPayload, mockState } from '@tasks/aer/submit/testing/mock-aer-apply-action';
+import {
+  mockAerApplyPayload,
+  mockAerApplyPayloadWithNonNegativeEmissions,
+  mockState,
+} from '@tasks/aer/submit/testing/mock-aer-apply-action';
 import { mockStateBuild } from '@tasks/aer/submit/testing/mock-state';
 import { CommonTasksState } from '@tasks/store/common-tasks.state';
 import { CommonTasksStore } from '@tasks/store/common-tasks.store';
@@ -43,7 +47,7 @@ describe('SendReportGuard', () => {
         requestTask: {
           ...mockState.requestTaskItem.requestTask,
           payload: {
-            ...mockAerApplyPayload,
+            ...mockAerApplyPayloadWithNonNegativeEmissions,
             permitType: 'HSE',
             aerSectionsCompleted: {
               ...getAvailableSections(mockAerApplyPayload).reduce((res, key) => ({ ...res, [key]: [true] }), {}),
@@ -72,7 +76,7 @@ describe('SendReportGuard', () => {
         requestTask: {
           ...mockState.requestTaskItem.requestTask,
           payload: {
-            ...mockAerApplyPayload,
+            ...mockAerApplyPayloadWithNonNegativeEmissions,
             permitType: 'GHGE',
             verificationPerformed: true,
             aerSectionsCompleted: {
@@ -98,7 +102,7 @@ describe('SendReportGuard', () => {
         requestTask: {
           ...mockState.requestTaskItem.requestTask,
           payload: {
-            ...mockAerApplyPayload,
+            ...mockAerApplyPayloadWithNonNegativeEmissions,
             aerSectionsCompleted: {
               ...getAvailableSections(mockAerApplyPayload).reduce((res, key) => ({ ...res, [key]: [true] }), {}),
             },

@@ -27,7 +27,9 @@ describe('TextInputComponent', () => {
         [maxLength]="maxLength"
         label="First control"
         [isLabelHidden]="isLabelHidden"
-        [labelSize]="labelSize"></div>
+        [labelSize]="labelSize"
+        [hint]="hint"
+        [describedBy]="describedBy"></div>
       <div
         [isLabelHidden]="isLabelHidden"
         [labelSize]="labelSize"
@@ -57,6 +59,8 @@ describe('TextInputComponent', () => {
     prefix: string;
     suffix: string;
     maxLength: number;
+    hint: string;
+    describedBy: string;
   }
 
   @Component({
@@ -264,5 +268,39 @@ describe('TextInputComponent', () => {
     fixtureTestComponent.detectChanges();
 
     expect(label.className).toEqual('govuk-label govuk-label--l');
+  });
+
+  it('should not set aria-describedby when there is no hint or describedBy', () => {
+    const input = fixtureTestComponent.debugElement.query(By.css('input')).nativeElement as HTMLInputElement;
+
+    expect(input.getAttribute('aria-describedby')).toBeNull();
+  });
+
+  it('should associate the input with its hint via aria-describedby', () => {
+    const input = fixtureTestComponent.debugElement.query(By.css('input')).nativeElement as HTMLInputElement;
+
+    hostTestComponent.hint = 'Must be a whole number, 0 or more';
+    fixtureTestComponent.detectChanges();
+
+    expect(input.getAttribute('aria-describedby')).toEqual(`${testComponent.identifier}-hint`);
+  });
+
+  it('should merge the describedBy input with the hint id in aria-describedby', () => {
+    const input = fixtureTestComponent.debugElement.query(By.css('input')).nativeElement as HTMLInputElement;
+
+    hostTestComponent.hint = 'Must be a whole number, 0 or more';
+    hostTestComponent.describedBy = 'custom-error-id';
+    fixtureTestComponent.detectChanges();
+
+    expect(input.getAttribute('aria-describedby')).toEqual(`${testComponent.identifier}-hint custom-error-id`);
+  });
+
+  it('should use only describedBy when there is no hint', () => {
+    const input = fixtureTestComponent.debugElement.query(By.css('input')).nativeElement as HTMLInputElement;
+
+    hostTestComponent.describedBy = 'custom-hint-id custom-error-id';
+    fixtureTestComponent.detectChanges();
+
+    expect(input.getAttribute('aria-describedby')).toEqual('custom-hint-id custom-error-id');
   });
 });

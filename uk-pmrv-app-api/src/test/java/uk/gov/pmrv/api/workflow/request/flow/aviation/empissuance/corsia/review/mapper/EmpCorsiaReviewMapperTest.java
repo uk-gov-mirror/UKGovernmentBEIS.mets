@@ -1,13 +1,5 @@
 package uk.gov.pmrv.api.workflow.request.flow.aviation.empissuance.corsia.review.mapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import uk.gov.pmrv.api.account.aviation.domain.dto.ServiceContactDetails;
@@ -37,6 +29,15 @@ import uk.gov.pmrv.api.workflow.request.flow.aviation.empissuance.corsia.review.
 import uk.gov.pmrv.api.workflow.request.flow.aviation.empissuance.corsia.submit.domain.EmpIssuanceCorsiaRequestPayload;
 import uk.gov.pmrv.api.workflow.request.flow.common.domain.DecisionNotification;
 import uk.gov.pmrv.api.workflow.request.flow.common.domain.dto.RequestActionUserInfo;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class EmpCorsiaReviewMapperTest {
 
@@ -229,9 +230,25 @@ class EmpCorsiaReviewMapperTest {
             "regulatorUserId", RequestActionUserInfo.builder().name("regulatorUserName").roleCode("admin").build()
         );
 
+        ServiceContactDetails serviceContactDetails = ServiceContactDetails.builder()
+                .name("service contact name")
+                .email("service@example.com")
+                .build();
+
+        RequestAviationAccountInfo accountInfo = RequestAviationAccountInfo.builder()
+                .operatorName("operatorName")
+                .crcoCode("crcoCode")
+                .serviceContactDetails(serviceContactDetails)
+                .build();
+
         EmpIssuanceCorsiaApplicationDeemedWithdrawnRequestActionPayload applicationDeemedWithdrawnRequestActionPayload =
-            empCorsiaReviewMapper.toEmpIssuanceCorsiaApplicationDeemedWithdrawnRequestActionPayload(empIssuanceCorsiaRequestPayload, usersInfo,
-                RequestActionPayloadType.EMP_ISSUANCE_CORSIA_APPLICATION_DEEMED_WITHDRAWN_PAYLOAD);
+                empCorsiaReviewMapper.toEmpIssuanceCorsiaApplicationDeemedWithdrawnRequestActionPayload(
+                        empIssuanceCorsiaRequestPayload,
+                        accountInfo,
+                        usersInfo,
+                        RequestActionPayloadType.EMP_ISSUANCE_CORSIA_APPLICATION_DEEMED_WITHDRAWN_PAYLOAD
+                );
+
 
         assertEquals(RequestActionPayloadType.EMP_ISSUANCE_CORSIA_APPLICATION_DEEMED_WITHDRAWN_PAYLOAD,
             applicationDeemedWithdrawnRequestActionPayload.getPayloadType());

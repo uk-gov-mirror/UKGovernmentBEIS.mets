@@ -8,12 +8,13 @@ import { DateInputComponent } from './date-input.component';
 describe('DateInputComponent', () => {
   @Component({
     imports: [DateInputComponent, ReactiveFormsModule],
-    template: '<div govuk-date-input [formControl]="control" [min]="min" [max]="max"></div>',
+    template: '<div govuk-date-input [formControl]="control" [min]="min" [max]="max" [hint]="hint"></div>',
   })
   class TestComponent {
     control = new FormControl();
     min: Date;
     max: Date;
+    hint: string;
   }
 
   @Component({
@@ -238,5 +239,21 @@ describe('DateInputComponent', () => {
     fixture.detectChanges();
 
     expect(hostComponent.control.valid).toBeFalsy();
+  });
+
+  it('should not set aria-describedby on day/month/year inputs when there is no hint', () => {
+    const inputs = fixture.debugElement.queryAll(By.css('input'));
+
+    inputs.forEach((input) => expect(input.nativeElement.getAttribute('aria-describedby')).toBeNull());
+  });
+
+  it('should associate day/month/year inputs with the hint via aria-describedby', () => {
+    hostComponent.hint = 'Must be today or in the past';
+    fixture.detectChanges();
+
+    const inputs = fixture.debugElement.queryAll(By.css('input'));
+    const expectedId = `${component.identifier}-hint`;
+
+    inputs.forEach((input) => expect(input.nativeElement.getAttribute('aria-describedby')).toEqual(expectedId));
   });
 });

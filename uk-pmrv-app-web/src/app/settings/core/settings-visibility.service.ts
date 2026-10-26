@@ -6,11 +6,13 @@ import { AccountType } from '@core/store';
 
 import { SettingsService } from 'pmrv-api';
 
+import { SettingsEmissionFactorsPermissionService } from './settings-emission-factors-permission.service';
 import { SettingsFeesPermissionService } from './settings-fees-permission.service';
 
 @Injectable({ providedIn: 'root' })
 export class SettingsVisibilityService {
   private readonly settingsService = inject(SettingsService);
+  private readonly settingsEmissionFactorsPermissionService = inject(SettingsEmissionFactorsPermissionService);
   private readonly settingsFeesPermissionService = inject(SettingsFeesPermissionService);
 
   hasAnyAccessibleSection(accountType: AccountType): Observable<boolean> {
@@ -18,7 +20,7 @@ export class SettingsVisibilityService {
       switchMap((sections) =>
         combineLatest([
           sections.includes('FEES') ? this.settingsFeesPermissionService.canView() : of(false),
-          of(sections.includes('EMISSION_FACTORS')),
+          sections.includes('EMISSION_FACTORS') ? this.settingsEmissionFactorsPermissionService.canView() : of(false),
           of(sections.includes('GLOBAL_WARMING_POTENTIALS')),
         ]),
       ),

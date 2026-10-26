@@ -2,7 +2,7 @@
   <app-page-heading>PFC emissions</app-page-heading>
   <div *ngIf="aer$ | async as aer">
     <ng-container *ngIf="(sourceStreamEmissions$ | async)?.length > 0; else emptyCalculation">
-      <p class="govuk-body">Complete the table summarising the emissions from each entry.</p>
+      <app-include-calc-measurement-info></app-include-calc-measurement-info>
 
       <app-pfc-group [data]="aer" [statuses]="statuses$ | async" [isReview]="false"></app-pfc-group>
 
@@ -10,8 +10,7 @@
         <a
           [routerLink]="['./', (sourceStreamEmissions$ | async).length, 'emission-network']"
           govukSecondaryButton
-          type="button"
-        >
+          type="button">
           Add another source stream
         </a>
       </div>

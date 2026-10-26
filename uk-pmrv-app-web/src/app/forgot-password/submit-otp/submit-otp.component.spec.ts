@@ -145,6 +145,34 @@ describe('SubmitOtpComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['error', '404']);
   });
 
+  it('should navigate to invalid link page if the reset password link has expired', () => {
+    const navigateSpy = jest.spyOn(router, 'navigate');
+    forgotPasswordService.resetPassword.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 400, error: { code: 'EMAIL1001' } })),
+    );
+
+    page.passwordValue = '123456';
+    page.submitButton.click();
+    fixture.detectChanges();
+
+    expect(forgotPasswordService.resetPassword).toHaveBeenCalledTimes(1);
+    expect(navigateSpy).toHaveBeenCalledWith(['forgot-password', 'invalid-link']);
+  });
+
+  it('should navigate to 404 if the reset password token is invalid', () => {
+    const navigateSpy = jest.spyOn(router, 'navigate');
+    forgotPasswordService.resetPassword.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 400, error: { code: 'TOKEN1001' } })),
+    );
+
+    page.passwordValue = '123456';
+    page.submitButton.click();
+    fixture.detectChanges();
+
+    expect(forgotPasswordService.resetPassword).toHaveBeenCalledTimes(1);
+    expect(navigateSpy).toHaveBeenCalledWith(['error', '404']);
+  });
+
   it('should have a login link with the correct href', async () => {
     forgotPasswordService.resetPassword.mockReturnValueOnce(of({}));
 

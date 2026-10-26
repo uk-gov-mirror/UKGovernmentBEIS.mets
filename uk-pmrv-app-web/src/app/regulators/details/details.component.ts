@@ -199,6 +199,7 @@ export class DetailsComponent implements OnInit {
       BULK_DOWNLOAD_BDRS2: ['NONE'],
       MI_REPORTS_MANAGE_CUSTOM: ['NONE'],
       SETTINGS_PAGE_FEES: ['NONE'],
+      SETTINGS_PAGE_EMISSION_FACTORS: ['NONE'],
     }),
   });
 
@@ -550,6 +551,11 @@ export class DetailsComponent implements OnInit {
       permission: 'SETTINGS_PAGE_FEES',
       task: 'Review/Submit',
       type: 'Settings page fees',
+    },
+    {
+      permission: 'SETTINGS_PAGE_EMISSION_FACTORS',
+      task: 'Review/Submit',
+      type: 'Settings page emission factors',
     },
   ];
 

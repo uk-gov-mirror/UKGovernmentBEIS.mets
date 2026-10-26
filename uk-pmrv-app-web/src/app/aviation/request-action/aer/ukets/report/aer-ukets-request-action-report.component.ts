@@ -51,7 +51,6 @@ import {
   AviationReportingService,
   LimitedCompanyOrganisation,
   RequestActionDTO,
-  RequestActionInfoDTO,
   RequestActionsService,
   StandardFuelsTotalEmissions,
 } from 'pmrv-api';
@@ -142,7 +141,7 @@ export class AerUketsRequestActionReportComponent implements OnInit, AfterViewIn
           this.aviationReportingService.getNonDomesticFlightsEmissionsUkEts(aviationAerEmissionsCalculationDTO),
           this.requestActionsService
             .getRequestActionsByRequestId(requestAction.requestId)
-            .pipe(map((res) => this.sortTimeline(res.filter((timeline) => timeline.id <= requestAction.id)))),
+            .pipe(map((res) => res.filter((timeline) => timeline.id <= requestAction.id))),
         ]),
         of(null),
       ).pipe(
@@ -289,9 +288,5 @@ export class AerUketsRequestActionReportComponent implements OnInit, AfterViewIn
         value: FUEL_TYPES.find((f) => f.value === ft).consumption,
       };
     });
-  }
-
-  private sortTimeline(res: RequestActionInfoDTO[]): RequestActionInfoDTO[] {
-    return res.slice().sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
   }
 }

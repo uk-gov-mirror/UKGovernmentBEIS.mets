@@ -1,0 +1,37 @@
+<p class="govuk-body">
+  @if (!isMeasurement()) {
+    The table includes the source streams and related emission sources from your approved monitoring plan.
+  } @else {
+    The table includes the emission points and related emission sources from your approved monitoring plan.
+  }
+</p>
+<p class="govuk-body">Complete each entry to report emissions for the reporting year.</p>
+<govuk-details summary="If data needed to calculate your emissions was missing">
+  <p class="govuk-body">
+    @if (!isMeasurement()) {
+      You must report data gaps that resulted in one or more tiers changing from those in your approved monitoring plan.
+    } @else {
+      You must report data gaps that resulted in a tier change from your approved monitoring plan.
+    }
+  </p>
+  <p class="govuk-body">
+    @if (!isMeasurement()) {
+      Each data gap must be reported separately from your normal source stream emissions. Select ‘Add another source
+      stream’ to add a data gap and include the:
+    } @else {
+      Each data gap must be reported separately from your normal emission point emissions. Select ‘Add another emission
+      point’ to add a data gap and include the:
+    }
+  </p>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>start and end date of the gap</li>
+    <li>tiers used</li>
+    <li>emission</li>
+    <li>reason for the gap</li>
+  </ul>
+  <p class="govuk-body">Do not double count emissions attributed to the data gap from the same source stream.</p>
+  <p class="govuk-body">
+    If you used surrogate data that did not impact the tier, you do not need to report this separately.
+  </p>
+  <p class="govuk-body">You should have notified your regulator of any data gaps.</p>
+</govuk-details>

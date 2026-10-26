@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   Input,
+  numberAttribute,
   OnInit,
   Optional,
   Self,
@@ -42,12 +43,14 @@ import { FileUpload, FileUploadEvent } from './file-upload-event';
 })
 export class FileInputComponent implements OnInit, ControlValueAccessor {
   @Input() headerSize: 'm' | 's';
+  @Input({ transform: numberAttribute }) headingLevel = 2;
   @Input() listTitle: string;
   @Input() label: string;
   @Input() text: string;
   @Input() showFilesizeHint = true;
   @Input() hint: string;
   @Input() accepted = '*/*';
+  @Input() buttonText = 'Choose file';
   @Input() customHintTemplate: TemplateRef<any>;
   @Input() downloadUrl: (uuid: string) => string | string[];
   @Input() fileNameTransformer!: (file: File | null) => File | null;
@@ -55,9 +58,11 @@ export class FileInputComponent implements OnInit, ControlValueAccessor {
   uploadedFiles$: Observable<FileUploadEvent[]>;
   uploadErrorText$: Observable<string>;
   isDisabled: boolean;
+  isFocused = false;
   onFileBlur: () => any;
 
   @ViewChild('input') private readonly input: ElementRef<HTMLInputElement>;
+  @ViewChild('trigger') private readonly trigger: ElementRef<HTMLLabelElement>;
   private value$ = new BehaviorSubject<FileUpload>(null);
   private onChange: (value: FileUpload) => any;
 
@@ -99,9 +104,10 @@ export class FileInputComponent implements OnInit, ControlValueAccessor {
     );
 
     this.uploadedFiles$ = merge(
-      combineLatest([this.value$.pipe(map((value) => (value ? { ...value, progress: null } : null))), errors$]).pipe(
-        map(([value, errors]) => (value ? { ...value, errors } : null)),
-      ),
+      combineLatest([
+        this.value$.pipe(map((value): FileUploadEvent | null => (value ? { ...value, progress: null } : null))),
+        errors$,
+      ]).pipe(map(([value, errors]) => (value ? { ...value, errors } : null))),
       this.fileUploadService.uploadProgress$.pipe(
         withLatestFrom(this.value$),
         filter(([fileEvent, value]) => fileEvent.file === value?.file),
@@ -165,21 +171,44 @@ export class FileInputComponent implements OnInit, ControlValueAccessor {
     }
   }
 
+  // The input is visually hidden, so any focus it receives (e.g. from the error summary) is moved to the trigger
+  onFileFocus(): void {
+    this.trigger.nativeElement.focus();
+  }
+
+  onTriggerFocus(): void {
+    this.isFocused = true;
+  }
+
+  onTriggerBlur(): void {
+    this.isFocused = false;
+    this.onFileBlur();
+  }
+
+  onTriggerKeydown(event: Event): void {
+    event.preventDefault();
+
+    if (!this.isDisabled) {
+      this.input.nativeElement.click();
+    }
+  }
+
   onFileDeleteClick(): void {
     this.onChange(null);
     this.input.nativeElement.value = null;
+    this.trigger.nativeElement.focus();
   }
 
-  private uploadFile(file: File, dimensions): void {
+  private uploadFile(file: File, dimensions: FileUpload['dimensions'] | null): void {
     this.onChange({ file, uuid: null, dimensions });
   }
 
-  private isImage(file: File) {
-    return file['type'].split('/')[0] == 'image';
+  private isImage(file: File): boolean {
+    return file.type.split('/')[0] === 'image';
   }
 
-  private getImageFileDimensionsResolver = (dataURL) =>
-    new Promise<{ width: number; height: number }>((resolve, reject) => {
+  private getImageFileDimensionsResolver = (dataURL: string) =>
+    new Promise<FileUpload['dimensions']>((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
         resolve({

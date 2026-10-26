@@ -4,10 +4,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import uk.gov.netz.api.authorization.core.domain.AppUser;
 import uk.gov.netz.api.files.common.domain.dto.FileInfoDTO;
 import uk.gov.pmrv.api.account.installation.service.InstallationAccountStatusService;
+import uk.gov.pmrv.api.integration.registry.notification.installation.request.InstallationNotificationRegistryEvent;
 import uk.gov.pmrv.api.workflow.request.core.domain.Request;
 import uk.gov.pmrv.api.workflow.request.core.domain.RequestTask;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestActionPayloadType;
@@ -63,6 +66,9 @@ class RequestPermitRevocationCessationServiceTest {
     @Mock
     private PermitCessationCompletedRequestActionPayloadMapper cessationCompletedRequestActionPayloadMapper;
 
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+
 
     @Test
     void applySaveCessation() {
@@ -91,6 +97,7 @@ class RequestPermitRevocationCessationServiceTest {
             .build();
 
         service.applySaveCessation(requestTask, taskActionPayload);
+
 
         final PermitCessationSubmitRequestTaskPayload taskPayload =
             (PermitCessationSubmitRequestTaskPayload) requestTask.getPayload();
@@ -169,5 +176,7 @@ class RequestPermitRevocationCessationServiceTest {
             "regulatorAssignee");
         verify(permitRevocationOfficialNoticeService, times(1))
             .sendOfficialNotice(request, officialNotice, taskActionPayload.getDecisionNotification());
+        verify(applicationEventPublisher, times(1)).publishEvent(Mockito.any(InstallationNotificationRegistryEvent.class));
+
     }
 }

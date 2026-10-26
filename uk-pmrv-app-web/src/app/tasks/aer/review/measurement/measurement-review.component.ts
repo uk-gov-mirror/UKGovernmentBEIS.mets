@@ -15,6 +15,7 @@ import { AerService } from '../../core/aer.service';
       [breadcrumb]="true"
       [notification]="notification"
       heading="{{ taskKey | monitoringApproachEmissionDescription }}">
+      <app-include-calc-measurement-info [isMeasurement]="true"></app-include-calc-measurement-info>
       <app-measurement-group [data]="aerData$ | async" [taskKey]="taskKey"></app-measurement-group>
       <app-aer-review-group-decision (notification)="notification = $event"></app-aer-review-group-decision>
     </app-aer-task-review>

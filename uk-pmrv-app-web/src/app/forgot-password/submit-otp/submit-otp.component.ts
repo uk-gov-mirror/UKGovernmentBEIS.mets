@@ -65,18 +65,25 @@ export class SubmitOtpComponent implements OnInit {
             password: password,
           }),
         ),
-        catchBadRequest([ErrorCodes.OTP1001, ErrorCodes.USER1004, ErrorCodes.USER1005], (res) => {
-          switch (res.error.code) {
-            case ErrorCodes.OTP1001:
-              this.form.get('otp').setErrors({ otpInvalid: 'Invalid OTP' });
-              break;
-            case ErrorCodes.USER1004:
-            case ErrorCodes.USER1005:
-              this.router.navigate(['error', '404']);
-          }
-          this.isSummaryDisplayed$.next(true);
-          return EMPTY;
-        }),
+        catchBadRequest(
+          [ErrorCodes.OTP1001, ErrorCodes.USER1004, ErrorCodes.USER1005, ErrorCodes.EMAIL1001, ErrorCodes.TOKEN1001],
+          (res) => {
+            switch (res.error.code) {
+              case ErrorCodes.OTP1001:
+                this.form.get('otp').setErrors({ otpInvalid: 'Invalid OTP' });
+                break;
+              case ErrorCodes.EMAIL1001:
+                this.router.navigate(['forgot-password', 'invalid-link']);
+                break;
+              case ErrorCodes.USER1004:
+              case ErrorCodes.USER1005:
+              case ErrorCodes.TOKEN1001:
+                this.router.navigate(['error', '404']);
+            }
+            this.isSummaryDisplayed$.next(true);
+            return EMPTY;
+          },
+        ),
       )
       .subscribe(() => {
         this.isPasswordReset = true;

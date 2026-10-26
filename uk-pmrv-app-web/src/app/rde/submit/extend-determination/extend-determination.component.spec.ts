@@ -73,19 +73,25 @@ describe('ExtendDeterminationComponent', () => {
   it('should navigate only if form valid', inject([Router], (router: Router) => {
     const navigateSpy = jest.spyOn(router, 'navigate').mockImplementation();
 
-    page.extensionDateDay = '10';
-    page.extensionDateMonth = '10';
+    // extension date must be after today + daysRemaining (10), deadline must be in the future and before extension date
+    const extensionDate = new Date();
+    extensionDate.setDate(extensionDate.getDate() + 20);
+    const deadline = new Date();
+    deadline.setDate(deadline.getDate() + 15);
+
+    page.extensionDateDay = String(extensionDate.getDate());
+    page.extensionDateMonth = String(extensionDate.getMonth() + 1);
     fixture.detectChanges();
 
     page.submitButton.click();
 
     expect(navigateSpy).not.toHaveBeenCalled();
 
-    page.extensionDateYear = '2050';
+    page.extensionDateYear = String(extensionDate.getFullYear());
 
-    page.deadlineDay = '08';
-    page.deadlineMonth = '10';
-    page.deadlineYear = '2050';
+    page.deadlineDay = String(deadline.getDate());
+    page.deadlineMonth = String(deadline.getMonth() + 1);
+    page.deadlineYear = String(deadline.getFullYear());
     fixture.detectChanges();
 
     page.submitButton.click();

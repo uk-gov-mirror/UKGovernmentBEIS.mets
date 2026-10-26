@@ -198,7 +198,6 @@ import { TextEllipsisPipe } from './pipes/text-ellipsis.pipe';
 import { PrintComponent } from './print/print.component';
 import { RadioOptionComponent } from './radio-option/radio-option.component';
 import { ServiceBannerComponent } from './service-banner/service-banner.component';
-import { SkipLinkFocusDirective } from './skip-link-focus.directive';
 import { SummaryHeaderComponent } from './summary-header/summary-header.component';
 import { TaskItemComponent } from './task-list/task-item/task-item.component';
 import { TaskItemListComponent } from './task-list/task-item-list/task-item-list.component';
@@ -378,7 +377,6 @@ import { WizardStepComponent } from './wizard/wizard-step.component';
     RequestActionReportComponent,
     RouterLinkComponent,
     SelectOtherComponent,
-    SkipLinkFocusDirective,
     SourceStreamDeleteTemplateComponent,
     SourceStreamDetailsTemplateComponent,
     SourceStreamHelpTemplateComponent,
@@ -577,7 +575,6 @@ import { WizardStepComponent } from './wizard/wizard-step.component';
     RequestActionHeadingComponent,
     RequestActionReportComponent,
     SelectOtherComponent,
-    SkipLinkFocusDirective,
     SourceStreamDeleteTemplateComponent,
     SourceStreamDetailsTemplateComponent,
     SourceStreamHelpTemplateComponent,

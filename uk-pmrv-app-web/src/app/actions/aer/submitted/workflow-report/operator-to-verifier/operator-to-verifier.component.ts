@@ -8,7 +8,6 @@ import { RequestActionReportService } from '@shared/services/request-action-repo
 import {
   AerApplicationVerificationSubmittedRequestActionPayload,
   RequestActionDTO,
-  RequestActionInfoDTO,
   RequestActionsService,
 } from 'pmrv-api';
 
@@ -59,9 +58,7 @@ export class OperatorToVerifierComponent implements AfterViewInit {
       combineLatest([
         this.requestActionsService.getRequestActionsByRequestId(requestAction?.requestId),
         this.requestAction$,
-      ]).pipe(
-        map(([res, requestAction]) => this.sortTimeline(res.filter((timeline) => timeline.id <= requestAction.id))),
-      ),
+      ]).pipe(map(([res, requestAction]) => res.filter((timeline) => timeline.id <= requestAction.id))),
     ),
   );
 
@@ -91,10 +88,6 @@ export class OperatorToVerifierComponent implements AfterViewInit {
         )?.[0]?.creationDate,
     ),
   );
-
-  private sortTimeline(res: RequestActionInfoDTO[]): RequestActionInfoDTO[] {
-    return res.slice().sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
-  }
 
   vm$ = combineLatest({
     payload: this.payload$,

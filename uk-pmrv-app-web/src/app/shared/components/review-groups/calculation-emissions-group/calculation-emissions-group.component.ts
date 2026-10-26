@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 
-import { isCalculationWizardComplete } from '@shared/components/approaches/aer/monitoring-approaches.functions';
+import {
+  getCalculationSourceStreamEmissionValues,
+  getCalculationTotalReportableEmissions,
+} from '@shared/components/approaches/aer/monitoring-approaches.functions';
 import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
 import { statusMap } from '@shared/task-list/task-item/status.map';
 import { TaskItemStatus } from '@shared/task-list/task-list.interface';
@@ -13,8 +16,8 @@ import { Aer, CalculationOfCO2Emissions } from 'pmrv-api';
 interface TemplateCalculationSourceStreamEmission {
   sourceStreamDescription?: string;
   emissionSources?: string[];
-  reportableEmissions?: string;
-  biomassEmissions?: string;
+  reportableEmissions?: number | string;
+  biomassEmissions?: number | string;
   status?: string;
 }
 
@@ -58,7 +61,7 @@ export class CalculationEmissionsGroupComponent implements OnInit {
       );
 
       const sourceStreamDescription = aerSourceStream?.reference
-        ? `${aerSourceStream.reference} ${sourceStreamDescriptionPipe.transform(aerSourceStream.description)}`
+        ? `${aerSourceStream.reference} ${sourceStreamDescriptionPipe.transform(aerSourceStream)}`
         : null;
 
       const emissionSources = sourceStreamEmission.emissionSources?.map(
@@ -66,20 +69,11 @@ export class CalculationEmissionsGroupComponent implements OnInit {
           aerEmissionSources.find((emissionSource) => emissionSource.id === currentEmissionSource)?.reference,
       );
 
-      let [reportableEmissions, biomassEmissions] =
-        this.isReview || isCalculationWizardComplete(sourceStreamEmission, hasTransfer)
-          ? this.getEmissionsValues(sourceStreamEmission)
-          : [0, 0];
-
-      if (hasTransfer && !!sourceStreamEmission?.transfer?.entryAccountingForTransfer) {
-        if (sourceStreamEmission?.transfer?.transferDirection === 'RECEIVED_FROM_ANOTHER_INSTALLATION') {
-          reportableEmissions = Math.abs(reportableEmissions);
-          biomassEmissions = Math.abs(biomassEmissions);
-        } else {
-          reportableEmissions = -Math.abs(reportableEmissions);
-          biomassEmissions = -Math.abs(biomassEmissions);
-        }
-      }
+      const [reportableEmissions, biomassEmissions] = getCalculationSourceStreamEmissionValues(
+        sourceStreamEmission,
+        hasTransfer,
+        this.isReview,
+      );
 
       return {
         sourceStreamDescription,
@@ -91,47 +85,21 @@ export class CalculationEmissionsGroupComponent implements OnInit {
     });
 
     if (this.sourceStreamEmissions.length) {
-      let sumOfReportableEmissions = new BigNumber(0),
-        sumOfBiomassEmissions = new BigNumber(0);
-
-      this.sourceStreamEmissions.forEach((sourceStreamEmission) => {
-        const bigReportableEmissions = new BigNumber(sourceStreamEmission.reportableEmissions);
-        const bigBiomassEmissions = new BigNumber(sourceStreamEmission.biomassEmissions);
-        sumOfReportableEmissions = bigReportableEmissions.plus(sumOfReportableEmissions);
-        sumOfBiomassEmissions = bigBiomassEmissions.plus(sumOfBiomassEmissions);
-      });
+      const sumOfBiomassEmissions = this.sourceStreamEmissions.reduce(
+        (sum, sourceStreamEmission) => sum.plus(sourceStreamEmission.biomassEmissions),
+        new BigNumber(0),
+      );
 
       this.sourceStreamEmissions.push({
         sourceStreamDescription: 'totals',
         emissionSources: [''],
-        reportableEmissions: sumOfReportableEmissions.toString(),
+        reportableEmissions: getCalculationTotalReportableEmissions(
+          monitoringApproachEmissions.CALCULATION_CO2 as CalculationOfCO2Emissions,
+          this.isReview,
+        ).toString(),
         biomassEmissions: sumOfBiomassEmissions.toString(),
         status: '',
       });
     }
-  }
-
-  private getEmissionsValues(sourceStreamEmission) {
-    const emissionCalculationParamValues =
-      sourceStreamEmission?.parameterCalculationMethod?.emissionCalculationParamValues;
-
-    const totalProvidedReportableEmissions =
-      emissionCalculationParamValues?.providedEmissions?.totalProvidedReportableEmissions;
-
-    const totalProvidedSustainableBiomassEmissions =
-      emissionCalculationParamValues?.providedEmissions?.totalProvidedSustainableBiomassEmissions;
-
-    const totalReportableEmissions = emissionCalculationParamValues?.totalReportableEmissions
-      ? emissionCalculationParamValues.totalReportableEmissions
-      : 0;
-
-    const totalSustainableBiomassEmissions = emissionCalculationParamValues?.totalSustainableBiomassEmissions
-      ? emissionCalculationParamValues?.totalSustainableBiomassEmissions
-      : 0;
-
-    return [
-      totalProvidedReportableEmissions ?? totalReportableEmissions ?? 0,
-      totalProvidedSustainableBiomassEmissions ?? totalSustainableBiomassEmissions ?? 0,
-    ];
   }
 }

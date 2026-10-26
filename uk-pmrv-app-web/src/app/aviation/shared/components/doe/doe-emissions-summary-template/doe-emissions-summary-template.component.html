@@ -6,16 +6,17 @@
       <dd govukSummaryListRowValue>
         {{ data.determinationReason.type | doeDeterminationReasonType }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a
-          govukLink
-          routerLink="../"
-          [queryParams]="changeUrlQueryParams"
-          hidden-text="reason for estimating emissions">
-          Change
-        </a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a
+            govukLink
+            routerLink="../"
+            [queryParams]="changeUrlQueryParams"
+            hidden-text="reason for estimating emissions">
+            Change
+          </a>
+        </dd>
+      }
     </div>
 
     <div govukSummaryListRow *ngIf="data?.determinationReason?.subtypes">
@@ -26,16 +27,17 @@
           <br />
         }
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a
-          govukLink
-          routerLink="../"
-          [queryParams]="changeUrlQueryParams"
-          hidden-text="emissions that are being corrected">
-          Change
-        </a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a
+            govukLink
+            routerLink="../"
+            [queryParams]="changeUrlQueryParams"
+            hidden-text="emissions that are being corrected">
+            Change
+          </a>
+        </dd>
+      }
     </div>
 
     <div govukSummaryListRow *ngIf="data?.determinationReason?.furtherDetails">
@@ -43,10 +45,11 @@
       <dd govukSummaryListRowValue class="pre-wrap">
         {{ data.determinationReason.furtherDetails }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a govukLink routerLink="../" [queryParams]="changeUrlQueryParams" hidden-text="further details">Change</a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a govukLink routerLink="../" [queryParams]="changeUrlQueryParams" hidden-text="further details">Change</a>
+        </dd>
+      }
     </div>
   </dl>
 </ng-container>
@@ -57,46 +60,49 @@
     <div govukSummaryListRow *ngIf="data?.emissions?.emissionsAllInternationalFlights">
       <dt govukSummaryListRowKey>Total emissions on all international flights</dt>
       <dd govukSummaryListRowValue>{{ data?.emissions?.emissionsAllInternationalFlights }} tCO2</dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a
-          govukLink
-          routerLink="../estimated-emissions"
-          [queryParams]="changeUrlQueryParams"
-          hidden-text="total emissions on all international flights">
-          Change
-        </a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a
+            govukLink
+            routerLink="../estimated-emissions"
+            [queryParams]="changeUrlQueryParams"
+            hidden-text="total emissions on all international flights">
+            Change
+          </a>
+        </dd>
+      }
     </div>
 
     <div govukSummaryListRow *ngIf="data?.emissions?.emissionsFlightsWithOffsettingRequirements">
       <dt govukSummaryListRowKey>Emissions from flights with offsetting requirements</dt>
       <dd govukSummaryListRowValue>{{ data?.emissions?.emissionsFlightsWithOffsettingRequirements }} tCO2</dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a
-          govukLink
-          routerLink="../estimated-emissions"
-          [queryParams]="changeUrlQueryParams"
-          hidden-text="emissions from flights with offsetting requirements">
-          Change
-        </a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a
+            govukLink
+            routerLink="../estimated-emissions"
+            [queryParams]="changeUrlQueryParams"
+            hidden-text="emissions from flights with offsetting requirements">
+            Change
+          </a>
+        </dd>
+      }
     </div>
 
     <div govukSummaryListRow *ngIf="data?.emissions?.emissionsClaimFromCorsiaEligibleFuels">
       <dt govukSummaryListRowKey>Emissions related to a claim from CORSIA eligible fuels</dt>
       <dd govukSummaryListRowValue>{{ data?.emissions?.emissionsClaimFromCorsiaEligibleFuels }} tCO2</dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a
-          govukLink
-          routerLink="../estimated-emissions"
-          [queryParams]="changeUrlQueryParams"
-          hidden-text="emissions related to a claim from CORSIA eligible fuels">
-          Change
-        </a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a
+            govukLink
+            routerLink="../estimated-emissions"
+            [queryParams]="changeUrlQueryParams"
+            hidden-text="emissions related to a claim from CORSIA eligible fuels">
+            Change
+          </a>
+        </dd>
+      }
     </div>
 
     <div govukSummaryListRow>
@@ -104,16 +110,17 @@
       <dd govukSummaryListRowValue class="pre-wrap">
         {{ data.emissions.calculationApproach }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a
-          govukLink
-          routerLink="../estimated-emissions"
-          [queryParams]="changeUrlQueryParams"
-          hidden-text="how have you estimated or corrected the emissions">
-          Change
-        </a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a
+            govukLink
+            routerLink="../estimated-emissions"
+            [queryParams]="changeUrlQueryParams"
+            hidden-text="how have you estimated or corrected the emissions">
+            Change
+          </a>
+        </dd>
+      }
     </div>
 
     <div govukSummaryListRow>
@@ -122,16 +129,17 @@
       <dd govukSummaryListRowValue *ngIf="files?.length">
         <app-summary-download-files [files]="files"></app-summary-download-files>
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a
-          govukLink
-          routerLink="../estimated-emissions"
-          [queryParams]="changeUrlQueryParams"
-          hidden-text="supporting documents">
-          Change
-        </a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a
+            govukLink
+            routerLink="../estimated-emissions"
+            [queryParams]="changeUrlQueryParams"
+            hidden-text="supporting documents">
+            Change
+          </a>
+        </dd>
+      }
     </div>
   </dl>
 </ng-container>
@@ -144,74 +152,79 @@
       <dd govukSummaryListRowValue>
         {{ data.fee.chargeOperator ? 'Yes' : 'No' }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a govukLink routerLink="../emission-charges" [queryParams]="changeUrlQueryParams" hidden-text="operator fee">
-          Change
-        </a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a govukLink routerLink="../emission-charges" [queryParams]="changeUrlQueryParams" hidden-text="operator fee">
+            Change
+          </a>
+        </dd>
+      }
     </div>
 
     <ng-container *ngIf="data.fee?.feeDetails">
       <div govukSummaryListRow>
         <dt govukSummaryListRowKey>Total billable hours</dt>
         <dd govukSummaryListRowValue>{{ data.fee.feeDetails.totalBillableHours }} hours</dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a
-            govukLink
-            routerLink="../emission-charges-calculation"
-            [queryParams]="changeUrlQueryParams"
-            hidden-text="total billable hours">
-            Change
-          </a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a
+              govukLink
+              routerLink="../emission-charges-calculation"
+              [queryParams]="changeUrlQueryParams"
+              hidden-text="total billable hours">
+              Change
+            </a>
+          </dd>
+        }
       </div>
       <div govukSummaryListRow>
         <dt govukSummaryListRowKey>Hourly rate</dt>
         <dd govukSummaryListRowValue>&pound;{{ data.fee.feeDetails.hourlyRate }} per hour</dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a
-            govukLink
-            routerLink="../emission-charges-calculation"
-            [queryParams]="changeUrlQueryParams"
-            hidden-text="hourly rate">
-            Change
-          </a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a
+              govukLink
+              routerLink="../emission-charges-calculation"
+              [queryParams]="changeUrlQueryParams"
+              hidden-text="hourly rate">
+              Change
+            </a>
+          </dd>
+        }
       </div>
       <div govukSummaryListRow>
         <dt govukSummaryListRowKey>Set a due date for the payment</dt>
         <dd govukSummaryListRowValue>
           {{ data.fee.feeDetails.dueDate | govukDate }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a
-            govukLink
-            routerLink="../emission-charges-calculation"
-            [queryParams]="changeUrlQueryParams"
-            hidden-text="due date for the payment">
-            Change
-          </a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a
+              govukLink
+              routerLink="../emission-charges-calculation"
+              [queryParams]="changeUrlQueryParams"
+              hidden-text="due date for the payment">
+              Change
+            </a>
+          </dd>
+        }
       </div>
       <div govukSummaryListRow *ngIf="data.fee.feeDetails?.comments">
         <dt govukSummaryListRowKey>Regulator comments</dt>
         <dd govukSummaryListRowValue class="pre-wrap">
           {{ data.fee.feeDetails.comments }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a
-            govukLink
-            routerLink="../emission-charges-calculation"
-            [queryParams]="changeUrlQueryParams"
-            hidden-text="regulator comments">
-            Change
-          </a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a
+              govukLink
+              routerLink="../emission-charges-calculation"
+              [queryParams]="changeUrlQueryParams"
+              hidden-text="regulator comments">
+              Change
+            </a>
+          </dd>
+        }
       </div>
       <div govukSummaryListRow>
         <dt govukSummaryListRowKey>Total operator fee</dt>
@@ -221,8 +234,8 @@
               | currency: 'GBP' : 'symbol' : '1.2-2'
           }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable"></dd>
+
+        <dd govukSummaryListRowActions></dd>
       </div>
     </ng-container>
   </dl>

@@ -50,5 +50,7 @@
 	<include file="changelog_custom_mi_reports_categories.xml" relativeToChangelogFile="true" />
 	<include file="changelog_permit_notification_metadata_migration.xml" relativeToChangelogFile="true" />
 	<include file="changelog_request_payment_fee_changeable_migration.xml" relativeToChangelogFile="true" />
+    <include file="changelog_settings_emission_factors.xml" relativeToChangelogFile="true" />
+	<include file="changelog_CBAM_migration.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

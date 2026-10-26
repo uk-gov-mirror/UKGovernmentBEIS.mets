@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Validator;
 import uk.gov.netz.api.common.exception.BusinessException;
 import uk.gov.netz.api.common.exception.ErrorCode;
+import uk.gov.pmrv.api.common.exception.MetsErrorCode;
 import uk.gov.pmrv.api.user.core.domain.dto.EmailDTO;
 import uk.gov.pmrv.api.user.core.domain.dto.ResetPasswordDTO;
 import uk.gov.pmrv.api.user.core.domain.dto.TokenDTO;
@@ -70,6 +71,19 @@ public class ForgotPasswordControllerTest {
             	.andExpect(status().isNoContent());
         
         verify(userResetPasswordService, times(1)).sendResetPasswordEmail(EMAIL);
+    }
+
+    @Test
+    void sendVerificationEmail_too_many_requests() throws Exception {
+        doThrow(new BusinessException(MetsErrorCode.TOO_MANY_REQUESTS))
+            .when(userResetPasswordService).sendResetPasswordEmail(EMAIL);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.post(BASE_PATH + SEND_VERIFICATION_EMAIL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(new EmailDTO(EMAIL))))
+            .andExpect(status().isTooManyRequests())
+            .andExpect(jsonPath("$.code").value(MetsErrorCode.TOO_MANY_REQUESTS.getCode()));
     }
 
     @Test

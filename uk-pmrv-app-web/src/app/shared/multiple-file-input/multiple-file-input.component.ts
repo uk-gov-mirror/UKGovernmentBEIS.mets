@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   Input,
+  numberAttribute,
   OnInit,
   Optional,
   Self,
@@ -44,6 +45,7 @@ import { FileUpload, FileUploadEvent } from '../file-input/file-upload-event';
 })
 export class MultipleFileInputComponent implements ControlValueAccessor, OnInit {
   @Input() headerSize: 'm' | 's' = 'm';
+  @Input({ transform: numberAttribute }) headingLevel = 2;
   @Input() listTitle: string;
   @Input() label = 'Upload a file';
   @Input() hint: string;
@@ -54,6 +56,7 @@ export class MultipleFileInputComponent implements ControlValueAccessor, OnInit 
   @Input() baseDownloadUrl: string;
   @Input() customHintTemplate: TemplateRef<any>;
   @ViewChild('input') fileInput: ElementRef<HTMLInputElement>;
+  @ViewChild('trigger') private readonly trigger: ElementRef<HTMLLabelElement>;
 
   uploadStatusText$ = new Subject<string>();
   uploadErrorText$: Observable<string>;
@@ -152,16 +155,33 @@ export class MultipleFileInputComponent implements ControlValueAccessor, OnInit 
     const files = (event?.target as HTMLInputElement)?.files;
     this.uploadFiles(files);
     this.fileInput.nativeElement.value = null;
-    this.fileInput.nativeElement.focus();
+    this.trigger.nativeElement.focus();
   }
 
+  // The input is visually hidden, so any focus it receives (e.g. from the error summary) is moved to the trigger
   onFileFocus(): void {
-    this.isFocused = true;
+    this.trigger.nativeElement.focus();
   }
 
   onFileBlur(): void {
+    this.onBlur();
+  }
+
+  onTriggerFocus(): void {
+    this.isFocused = true;
+  }
+
+  onTriggerBlur(): void {
     this.isFocused = false;
     this.onBlur();
+  }
+
+  onTriggerKeydown(event: Event): void {
+    event.preventDefault();
+
+    if (!this.isDisabled) {
+      this.fileInput.nativeElement.click();
+    }
   }
 
   onDragOver(event: DragEvent): void {
@@ -203,8 +223,6 @@ export class MultipleFileInputComponent implements ControlValueAccessor, OnInit 
   private applyRowErrors(errors: MessageValidationErrors, index: number): MessageValidationErrors {
     const rowErrors = Object.entries(errors ?? {}).filter(([key]) => key.endsWith(`-${index}`));
 
-    return rowErrors.length === 0
-      ? null
-      : rowErrors.reduce((acc, [key, value]) => ({ ...(acc ? acc : {}), [key]: value }) as any, null);
+    return rowErrors.length === 0 ? null : Object.fromEntries(rowErrors);
   }
 }

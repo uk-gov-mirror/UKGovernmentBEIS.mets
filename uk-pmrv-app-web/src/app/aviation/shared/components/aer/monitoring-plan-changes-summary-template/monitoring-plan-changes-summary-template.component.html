@@ -7,10 +7,11 @@
     <dd govukSummaryListRowValue>
       {{ data.notCoveredChangesExist ? 'Yes' : 'No' }}
     </dd>
-    <dd></dd>
-    <dd govukSummaryListRowActions *ngIf="isEditable">
-      <a govukLink routerLink="../" [queryParams]="queryParams">Change</a>
-    </dd>
+    @if (isEditable) {
+      <dd govukSummaryListRowActions>
+        <a govukLink routerLink="../" [queryParams]="queryParams">Change</a>
+      </dd>
+    }
   </div>
 </dl>
 <dl govuk-summary-list *ngIf="data.notCoveredChangesExist">
@@ -19,9 +20,10 @@
     <dd govukSummaryListRowValue class="pre-wrap">
       {{ data?.details }}
     </dd>
-    <dd></dd>
-    <dd govukSummaryListRowActions *ngIf="isEditable">
-      <a govukLink routerLink="../" [queryParams]="queryParams">Change</a>
-    </dd>
+    @if (isEditable) {
+      <dd govukSummaryListRowActions>
+        <a govukLink routerLink="../" [queryParams]="queryParams">Change</a>
+      </dd>
+    }
   </div>
 </dl>

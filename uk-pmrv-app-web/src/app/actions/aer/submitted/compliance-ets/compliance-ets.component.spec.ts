@@ -50,11 +50,12 @@ describe('ComplianceEtsComponent', () => {
 
   it('should show summary details', () => {
     expect(page.heading).toEqual('Compliance with ETS rules');
-    expect(page.summaryListValues).toHaveLength(12);
+    expect(page.summaryListValues).toHaveLength(13);
     expect(page.summaryListValues).toEqual([
       ['Monitoring Plan requirements met?', 'Yes'],
       ['EU Regulation on Monitoring and reporting met?', 'Yes'],
-      ['Data verified in detail and back to source', 'YesYes detail source data reason'],
+      ['Data verified in detail and back to source', 'Yes'],
+      ['Was this part of site verification?', 'Yes detail source data reason'],
       [
         'Control activities are documented, implemented, maintained and effective to mitigate the inherent risks?',
         'Yes',

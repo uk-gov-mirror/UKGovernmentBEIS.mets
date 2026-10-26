@@ -1,10 +1,11 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { GovukComponentsModule } from 'govuk-components';
 
@@ -66,5 +67,34 @@ describe('EmailComponent', () => {
 
     setValueAndSubmit('test@example.com');
     expect(getVerificationSent());
+  });
+
+  it('should display an error when too many emails have been requested and allow to request again', () => {
+    const operatorUsersRegistrationService = TestBed.inject(OperatorUsersRegistrationService);
+    jest
+      .spyOn(operatorUsersRegistrationService, 'sendVerificationEmail')
+      .mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 429 })));
+    const element: HTMLElement = fixture.nativeElement;
+    const button = element.querySelector<HTMLButtonElement>('button');
+    const getVerificationSent = () => fixture.debugElement.query(By.directive(VerificationSentComponent));
+
+    fixture.debugElement.query(By.css('input')).triggerEventHandler('input', { target: { value: 'test@example.com' } });
+    button.click();
+    fixture.detectChanges();
+
+    const tooManyRequestsError = 'You have requested too many verification emails. Try again later';
+    const errorSummaryList = Array.from(element.querySelectorAll('.govuk-error-summary__list a')).map((a) =>
+      a.textContent.trim(),
+    );
+    expect(errorSummaryList).toEqual([tooManyRequestsError]);
+    expect(element.querySelector('.govuk-error-message').textContent).toContain(tooManyRequestsError);
+    expect(button.disabled).toBe(false);
+    expect(getVerificationSent()).toBeNull();
+
+    button.click();
+    fixture.detectChanges();
+
+    expect(operatorUsersRegistrationService.sendVerificationEmail).toHaveBeenCalledTimes(2);
+    expect(getVerificationSent()).not.toBeNull();
   });
 });

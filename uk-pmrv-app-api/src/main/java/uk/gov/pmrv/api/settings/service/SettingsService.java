@@ -13,9 +13,13 @@ import uk.gov.pmrv.api.settings.domain.SettingsSection;
 public class SettingsService {
 
     private final SettingsFeeAuthorizationService settingsFeeAuthorizationService;
+    private final SettingsEmissionFactorsAuthorizationService settingsEmissionFactorsAuthorizationService;
 
     public List<SettingsSection> getAccessibleSections(AppUser appUser, AccountType accountType) {
         List<SettingsSection> sections = new ArrayList<>();
+        if (settingsEmissionFactorsAuthorizationService.canView(appUser) && SettingsSection.EMISSION_FACTORS.supportsAccountType(accountType)) {
+            sections.add(SettingsSection.EMISSION_FACTORS);
+        }
         if (settingsFeeAuthorizationService.canView(appUser) && SettingsSection.FEES.supportsAccountType(accountType)) {
             sections.add(SettingsSection.FEES);
         }

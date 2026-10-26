@@ -10,6 +10,7 @@
         <ng-container govukConditionalContent>
           <h2 class="govuk-heading-m">Additional documents</h2>
           <app-multiple-file-input
+            headingLevel="3"
             [baseDownloadUrl]="getBaseFileDownloadUrl()"
             [label]="(documentsExist$ | async) ? 'Upload a different file' : 'Upload files'"
             listTitle="Files added"

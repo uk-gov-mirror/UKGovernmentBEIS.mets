@@ -8,6 +8,7 @@ import { BasePage } from '@testing';
 
 import { SettingsService } from 'pmrv-api';
 
+import { SettingsEmissionFactorsPermissionService } from './core/settings-emission-factors-permission.service';
 import { SettingsFeesPermissionService } from './core/settings-fees-permission.service';
 import { SettingsComponent } from './settings.component';
 
@@ -20,6 +21,9 @@ describe('SettingsComponent', () => {
   const settingsService = {
     getAccessibleSections: jest.fn().mockReturnValue(of(['EMISSION_FACTORS', 'FEES', 'GLOBAL_WARMING_POTENTIALS'])),
   };
+  const settingsEmissionFactorsPermissionService = {
+    canView: jest.fn().mockReturnValue(of(true)),
+  };
   const settingsFeesPermissionService = {
     canView: jest.fn().mockReturnValue(of(true)),
   };
@@ -31,6 +35,11 @@ describe('SettingsComponent', () => {
     get linkTexts() {
       return this.queryAll<HTMLAnchorElement>('.app-settings-list a').map((a) => a.textContent?.trim());
     }
+    get emissionFactorsLink() {
+      return this.queryAll<HTMLAnchorElement>('.app-settings-list a').find(
+        (a) => a.textContent?.trim() === 'Emission factors',
+      );
+    }
     get feesLink() {
       return this.queryAll<HTMLAnchorElement>('.app-settings-list a').find((a) => a.textContent?.trim() === 'Fees');
     }
@@ -40,6 +49,7 @@ describe('SettingsComponent', () => {
     settingsService.getAccessibleSections.mockReturnValue(
       of(['EMISSION_FACTORS', 'FEES', 'GLOBAL_WARMING_POTENTIALS']),
     );
+    settingsEmissionFactorsPermissionService.canView.mockReturnValue(of(true));
     settingsFeesPermissionService.canView.mockReturnValue(of(true));
 
     await TestBed.configureTestingModule({
@@ -47,6 +57,7 @@ describe('SettingsComponent', () => {
       providers: [
         provideRouter([]),
         { provide: SettingsService, useValue: settingsService },
+        { provide: SettingsEmissionFactorsPermissionService, useValue: settingsEmissionFactorsPermissionService },
         { provide: SettingsFeesPermissionService, useValue: settingsFeesPermissionService },
       ],
     }).compileComponents();
@@ -107,6 +118,23 @@ describe('SettingsComponent', () => {
     fixture.detectChanges();
 
     expect(page.linkTexts).toEqual(['Fees']);
+  });
+
+  it('links the Emission factors item to the emission-factors page', () => {
+    authStore.setCurrentDomain('INSTALLATION');
+    createComponent();
+    fixture.detectChanges();
+
+    expect(page.emissionFactorsLink.getAttribute('href')).toEqual('/emission-factors');
+  });
+
+  it('hides the Emission factors link when the user has no emission factors permission, even if the section is accessible', () => {
+    settingsEmissionFactorsPermissionService.canView.mockReturnValue(of(false));
+    authStore.setCurrentDomain('INSTALLATION');
+    createComponent();
+    fixture.detectChanges();
+
+    expect(page.emissionFactorsLink).toBeFalsy();
   });
 
   it('links the Fees item to the fees page for Installation', () => {

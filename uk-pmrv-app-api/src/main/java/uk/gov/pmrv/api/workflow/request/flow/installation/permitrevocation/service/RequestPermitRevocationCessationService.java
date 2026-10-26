@@ -1,11 +1,14 @@
 package uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.netz.api.authorization.core.domain.AppUser;
 import uk.gov.netz.api.files.common.domain.dto.FileInfoDTO;
 import uk.gov.pmrv.api.account.installation.service.InstallationAccountStatusService;
+import uk.gov.pmrv.api.integration.registry.notification.common.RegistryNotificationType;
+import uk.gov.pmrv.api.integration.registry.notification.installation.request.InstallationNotificationRegistryEvent;
 import uk.gov.pmrv.api.workflow.request.core.domain.Request;
 import uk.gov.pmrv.api.workflow.request.core.domain.RequestTask;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestActionPayloadType;
@@ -31,6 +34,7 @@ public class RequestPermitRevocationCessationService {
     private final RequestService requestService;
     private final PermitRevocationOfficialNoticeService permitRevocationOfficialNoticeService;
     private final PermitCessationCompletedRequestActionPayloadMapper cessationCompletedRequestActionPayloadMapper;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public void applySaveCessation(final RequestTask requestTask,
@@ -79,5 +83,15 @@ public class RequestPermitRevocationCessationService {
         
         // send official notice
         permitRevocationOfficialNoticeService.sendOfficialNotice(request, officialNotice, taskActionPayload.getDecisionNotification());
+
+        // send permit revocation notification to registry
+        InstallationNotificationRegistryEvent installationNotificationRegistryEvent =
+                InstallationNotificationRegistryEvent.builder()
+                        .accountId(request.getAccountId())
+                        .requestId(request.getId())
+                        .registryNotificationType(RegistryNotificationType.PERMIT_REVOCATION_CESSATION_NOTIFICATION)
+                        .fileInfoDTO(officialNotice).build();
+
+        applicationEventPublisher.publishEvent(installationNotificationRegistryEvent);
     }
 }

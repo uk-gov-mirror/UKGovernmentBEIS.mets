@@ -12,6 +12,7 @@
       <label [for]="`${identifier}-day`" class="govuk-label govuk-date-input__label">Day</label>
       <input
         (blur)="onInputBlur()"
+        [attr.aria-describedby]="hint() ? `${identifier}-hint` : null"
         [class.govuk-input--error]="hasFieldError('day')"
         [id]="`${identifier}-day`"
         [name]="`${identifier}-day`"
@@ -26,6 +27,7 @@
       <label [for]="`${identifier}-month`" class="govuk-label govuk-date-input__label">Month</label>
       <input
         (blur)="onInputBlur()"
+        [attr.aria-describedby]="hint() ? `${identifier}-hint` : null"
         [class.govuk-input--error]="hasFieldError('month')"
         [id]="`${identifier}-month`"
         class="govuk-input govuk-date-input__input govuk-input--width-2"
@@ -39,6 +41,7 @@
       <label [for]="`${identifier}-year`" class="govuk-label govuk-date-input__label">Year</label>
       <input
         (blur)="onInputBlur()"
+        [attr.aria-describedby]="hint() ? `${identifier}-hint` : null"
         [class.govuk-input--error]="hasFieldError('year')"
         [id]="`${identifier}-year`"
         [name]="`${identifier}-year`"

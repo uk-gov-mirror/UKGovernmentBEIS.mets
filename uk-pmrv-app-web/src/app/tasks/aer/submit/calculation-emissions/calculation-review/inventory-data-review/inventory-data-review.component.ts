@@ -18,6 +18,8 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
+
 import { GovukValidators } from 'govuk-components';
 
 import {
@@ -57,6 +59,16 @@ export class InventoryDataReviewComponent {
       const res = (payload.aer.monitoringApproachEmissions.CALCULATION_CO2 as CalculationOfCO2Emissions)
         ?.sourceStreamEmissions?.[index];
       return res;
+    }),
+  );
+
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
     }),
   );
 
@@ -181,6 +193,7 @@ export class InventoryDataReviewComponent {
     readonly route: ActivatedRoute,
     readonly pendingRequest: PendingRequestService,
     readonly reportingService: ReportingService,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     readonly nationalInventoryService: NationalInventoryService,
     readonly regionalInventoryService: RegionalInventoryService,
     private readonly fb: UntypedFormBuilder,

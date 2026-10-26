@@ -1,0 +1,819 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        logicalFilePath="v0.2.0/changelog_CBAM_migration.xml"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+
+    <!-- ========================================================= -->
+    <!-- 1. Migration input / monitoring table                     -->
+    <!-- ========================================================= -->
+
+    <changeSet id="0_2_0_create_cbam_subinstallation_migration_table" author="alekopoulosd@unisystems.gr">
+
+        <createSequence
+                sequenceName="cbam_subinstallation_migration_seq"
+                startValue="1"
+                incrementBy="1"/>
+
+        <createTable tableName="cbam_subinstallation_migration">
+
+            <column name="id"
+                    type="BIGINT"
+                    defaultValueSequenceNext="cbam_subinstallation_migration_seq">
+                <constraints
+                        nullable="false"
+                        primaryKey="true"
+                        primaryKeyName="pk_cbam_subinstallation_migration"/>
+            </column>
+
+            <column name="account_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="source_value" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="target_value" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="migration_status"
+                    type="VARCHAR(30)"
+                    defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="error_message"
+                    type="VARCHAR(500)"/>
+
+            <column name="created_date"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="migrated_date"
+                    type="TIMESTAMP"/>
+
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="cbam_subinstallation_migration"
+                baseColumnNames="account_id"
+                referencedTableName="account"
+                referencedColumnNames="id"
+                constraintName="fk_cbam_subinstallation_migration_account"/>
+
+        <addUniqueConstraint
+                tableName="cbam_subinstallation_migration"
+                columnNames="account_id, source_value"
+                constraintName="uk_cbam_subinstallation_migration_account_source"/>
+
+        <sql>
+            ALTER TABLE cbam_subinstallation_migration
+                ADD CONSTRAINT chk_cbam_migration_status
+                    CHECK (
+                        migration_status IN (
+                                             'PENDING',
+                                             'COMPLETED',
+                                             'FAILED'
+                            )
+                        );
+        </sql>
+
+        <sql>
+            ALTER TABLE cbam_subinstallation_migration
+                ADD CONSTRAINT chk_cbam_source_target_mapping
+                    CHECK (
+                        (
+                            source_value = 'HYDROGEN'
+                                AND target_value IN (
+                                                     'HYDROGEN_CBAM',
+                                                     'HYDROGEN_NON_CBAM'
+                                )
+                            )
+                            OR (
+                            source_value = 'IRON_CASTING'
+                                AND target_value IN (
+                                                     'IRON_CASTING_CBAM',
+                                                     'IRON_CASTING_NON_CBAM'
+                                )
+                            )
+                            OR (
+                            source_value = 'HEAT_BENCHMARK_CL'
+                                AND target_value IN (
+                                                     'HEAT_BENCHMARK_CL_CBAM',
+                                                     'HEAT_BENCHMARK_CL_NON_CBAM'
+                                )
+                            )
+                            OR (
+                            source_value = 'FUEL_BENCHMARK_CL'
+                                AND target_value IN (
+                                                     'FUEL_BENCHMARK_CL_CBAM',
+                                                     'FUEL_BENCHMARK_CL_NON_CBAM'
+                                )
+                            )
+                            OR (
+                            source_value = 'PROCESS_EMISSIONS_CL'
+                                AND target_value IN (
+                                                     'PROCESS_EMISSIONS_CL_CBAM',
+                                                     'PROCESS_EMISSIONS_CL_NON_CBAM'
+                                )
+                            )
+                        );
+        </sql>
+
+        <rollback>
+            <dropTable tableName="cbam_subinstallation_migration"/>
+            <dropSequence sequenceName="cbam_subinstallation_migration_seq"/>
+        </rollback>
+
+    </changeSet>
+
+
+    <!-- ========================================================= -->
+    <!-- 2. CBAM migration                                         -->
+    <!--                                                           -->
+    <!-- One migration instruction can apply to both:              -->
+    <!--   - current completed permit                               -->
+    <!--   - open permit request payload(s)                         -->
+    <!-- ========================================================= -->
+
+    <changeSet id="0_2_0_cbam_subinstallation_migration" author="alekopoulosd@unisystems.gr" runAlways="true">
+
+        <preConditions onFail="CONTINUE">
+
+            <!-- At least one migration instruction must be pending -->
+            <sqlCheck expectedResult="1">
+                SELECT CASE
+                           WHEN EXISTS (
+                               SELECT 1
+                               FROM cbam_subinstallation_migration
+                               WHERE migration_status = 'PENDING'
+                           )
+                               THEN 1
+                           ELSE 0
+                           END
+            </sqlCheck>
+
+            <!-- Testing flag OR production migration date -->
+            <or>
+                <sqlCheck expectedResult="1">
+                    SELECT CASE
+                    WHEN EXISTS (
+                    SELECT 1
+                    FROM configuration
+                    WHERE key = 'sub_installation_types.cbam.transition.toggle'
+                    AND value = 'true'
+                    )
+                    THEN 1
+                    ELSE 0
+                    END
+                </sqlCheck>
+
+                <sqlCheck expectedResult="1">
+                    SELECT CASE
+                    WHEN CURRENT_DATE >= DATE '2027-01-01'
+                    THEN 1
+                    ELSE 0
+                    END
+                </sqlCheck>
+            </or>
+
+        </preConditions>
+
+
+        <!-- ===================================================== -->
+        <!-- 1. Validate migration input                           -->
+        <!--                                                       -->
+        <!-- Source must exist in at least one current permit      -->
+        <!-- representation:                                       -->
+        <!--   - completed permit                                  -->
+        <!--   - in-progress request payload                       -->
+        <!--   - in-progress request task payload                  -->
+        <!-- ===================================================== -->
+
+        <sql>
+            UPDATE cbam_subinstallation_migration m
+            SET migration_status = 'FAILED',
+                error_message = 'Source value not found in completed or in-progress permit'
+            WHERE m.migration_status = 'PENDING'
+
+            <!-- Completed permit -->
+            AND NOT EXISTS (
+              SELECT 1
+              FROM permit p
+              CROSS JOIN LATERAL jsonb_array_elements(
+                  p.data #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+              ) AS si(elem)
+              WHERE p.account_id = m.account_id
+                AND si.elem ->> 'subInstallationType' = m.source_value
+          )
+
+            <!-- In-progress request payload -->
+            AND NOT EXISTS (
+              SELECT 1
+              FROM request r
+              CROSS JOIN LATERAL jsonb_array_elements(
+                  r.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+              ) AS si(elem)
+              WHERE r.account_id = m.account_id
+                AND r.status = 'IN_PROGRESS'
+                AND r.type IN (
+                    'PERMIT_ISSUANCE',
+                    'PERMIT_VARIATION',
+                    'PERMIT_TRANSFER_B'
+                )
+                AND si.elem ->> 'subInstallationType' = m.source_value
+          )
+
+            <!-- In-progress request task payload -->
+            AND NOT EXISTS (
+              SELECT 1
+              FROM request r
+              JOIN request_task rt
+                ON rt.request_id = r.id
+              CROSS JOIN LATERAL jsonb_array_elements(
+                  rt.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+              ) AS si(elem)
+              WHERE r.account_id = m.account_id
+                AND r.status = 'IN_PROGRESS'
+                AND r.type IN (
+                    'PERMIT_ISSUANCE',
+                    'PERMIT_VARIATION',
+                    'PERMIT_TRANSFER_A',
+                    'PERMIT_TRANSFER_B'
+                )
+                AND si.elem ->> 'subInstallationType' = m.source_value
+          );
+        </sql>
+
+
+        <!-- ===================================================== -->
+        <!-- 2. Migrate completed permit subInstallationType       -->
+        <!-- ===================================================== -->
+
+        <sql>
+            UPDATE permit p
+            SET data = jsonb_set(
+                    p.data,
+                    '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}',
+                    (
+                        SELECT jsonb_agg(
+                                       CASE
+                                           WHEN migration.target_value IS NOT NULL
+                                               THEN jsonb_set(
+                                                   si.elem,
+                                                   '{subInstallationType}',
+                                                   to_jsonb(migration.target_value::text),
+                                                   false
+                                                    )
+                                           ELSE si.elem
+                                           END
+                                           ORDER BY si.ord
+                               )
+                        FROM jsonb_array_elements(
+                                     p.data #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+                             ) WITH ORDINALITY AS si(elem, ord)
+                                 LEFT JOIN cbam_subinstallation_migration migration
+                                           ON migration.account_id = p.account_id
+                                               AND migration.source_value = si.elem ->> 'subInstallationType'
+                        AND migration.migration_status = 'PENDING'
+                ),
+            false
+        )
+            WHERE EXISTS (
+                SELECT 1
+                FROM cbam_subinstallation_migration migration
+                         CROSS JOIN LATERAL jsonb_array_elements(
+                    p.data #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+            ) AS si(elem)
+                      WHERE migration.account_id = p.account_id
+                    AND migration.migration_status = 'PENDING'
+                    AND migration.source_value = si.elem ->> 'subInstallationType'
+        );
+        </sql>
+
+
+        <!-- ===================================================== -->
+        <!-- 3. Migrate completed permit methodTask references     -->
+        <!-- ===================================================== -->
+
+        <sql>
+            UPDATE permit p
+            SET data = jsonb_set(
+                    p.data,
+                    '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}',
+                    (
+                        SELECT jsonb_agg(
+                                       CASE
+                                           WHEN jsonb_exists(
+                                                   connection.elem,
+                                                   'subInstallations'
+                                                )
+                                               THEN jsonb_set(
+                                                   connection.elem,
+                                                   '{subInstallations}',
+                                                   (
+                                                       SELECT jsonb_agg(
+                                                                      to_jsonb(
+                                                                              COALESCE(
+                                                                                      migration.target_value,
+                                                                                      sub_type.value
+                                                                              )::text
+                                                                      )
+                                                                          ORDER BY sub_type.ord
+                                                              )
+                                                       FROM jsonb_array_elements_text(
+                                                                    connection.elem -> 'subInstallations'
+                                                            ) WITH ORDINALITY AS sub_type(value, ord)
+                                                                LEFT JOIN cbam_subinstallation_migration migration
+                                                                          ON migration.account_id = p.account_id
+                                                                              AND migration.source_value = sub_type.value
+                                                                              AND migration.migration_status = 'PENDING'
+                                                   ),
+                                                   false
+                                                    )
+                                           ELSE connection.elem
+                                           END
+                                           ORDER BY connection.ord
+                               )
+                        FROM jsonb_array_elements(
+                                p.data #> '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}'
+                             ) WITH ORDINALITY AS connection(elem, ord)
+                ),
+            false
+        )
+            WHERE EXISTS (
+                SELECT 1
+                FROM jsonb_array_elements(
+                        p.data #> '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}'
+                     ) AS connection(elem)
+                CROSS JOIN LATERAL jsonb_array_elements_text(
+                connection.elem -> 'subInstallations'
+            ) AS sub_type(value)
+                      JOIN cbam_subinstallation_migration migration
+                      ON migration.account_id = p.account_id
+                    AND migration.source_value = sub_type.value
+                    AND migration.migration_status = 'PENDING'
+                      );
+        </sql>
+
+
+        <!-- ===================================================== -->
+        <!-- 4. Migrate in-progress request payload                -->
+        <!--    subInstallationType                                -->
+        <!--                                                       -->
+        <!-- PERMIT_TRANSFER_A is excluded because its request     -->
+        <!-- payload does not contain a Permit.                    -->
+        <!-- originalPermitContainer is intentionally untouched.   -->
+        <!-- ===================================================== -->
+
+        <sql>
+            UPDATE request r
+            SET payload = jsonb_set(
+                    r.payload,
+                    '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}',
+                    (
+                        SELECT jsonb_agg(
+                                       CASE
+                                           WHEN migration.target_value IS NOT NULL
+                                               THEN jsonb_set(
+                                                   si.elem,
+                                                   '{subInstallationType}',
+                                                   to_jsonb(migration.target_value::text),
+                                                   false
+                                                    )
+                                           ELSE si.elem
+                                           END
+                                           ORDER BY si.ord
+                               )
+                        FROM jsonb_array_elements(
+                                     r.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+                             ) WITH ORDINALITY AS si(elem, ord)
+                                 LEFT JOIN cbam_subinstallation_migration migration
+                                           ON migration.account_id = r.account_id
+                                               AND migration.source_value = si.elem ->> 'subInstallationType'
+                        AND migration.migration_status = 'PENDING'
+                ),
+            false
+        )
+            WHERE r.status = 'IN_PROGRESS'
+              AND r.type IN (
+                             'PERMIT_ISSUANCE',
+                             'PERMIT_VARIATION',
+                             'PERMIT_TRANSFER_B'
+                )
+              AND EXISTS (
+                SELECT 1
+                FROM cbam_subinstallation_migration migration
+                         CROSS JOIN LATERAL jsonb_array_elements(
+                    r.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+              ) AS si(elem)
+                WHERE migration.account_id = r.account_id
+                    AND migration.migration_status = 'PENDING'
+                    AND migration.source_value = si.elem ->> 'subInstallationType'
+          );
+        </sql>
+
+
+        <!-- ===================================================== -->
+        <!-- 5. Migrate in-progress request payload                -->
+        <!--    methodTask references                              -->
+        <!-- ===================================================== -->
+
+        <sql>
+            UPDATE request r
+            SET payload = jsonb_set(
+                    r.payload,
+                    '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}',
+                    (
+                        SELECT jsonb_agg(
+                                       CASE
+                                           WHEN jsonb_exists(
+                                                   connection.elem,
+                                                   'subInstallations'
+                                                )
+                                               THEN jsonb_set(
+                                                   connection.elem,
+                                                   '{subInstallations}',
+                                                   (
+                                                       SELECT jsonb_agg(
+                                                                      to_jsonb(
+                                                                              COALESCE(
+                                                                                      migration.target_value,
+                                                                                      sub_type.value
+                                                                              )::text
+                                                                      )
+                                                                          ORDER BY sub_type.ord
+                                                              )
+                                                       FROM jsonb_array_elements_text(
+                                                                    connection.elem -> 'subInstallations'
+                                                            ) WITH ORDINALITY AS sub_type(value, ord)
+                                                                LEFT JOIN cbam_subinstallation_migration migration
+                                                                          ON migration.account_id = r.account_id
+                                                                              AND migration.source_value = sub_type.value
+                                                                              AND migration.migration_status = 'PENDING'
+                                                   ),
+                                                   false
+                                                    )
+                                           ELSE connection.elem
+                                           END
+                                           ORDER BY connection.ord
+                               )
+                        FROM jsonb_array_elements(
+                                r.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}'
+                             ) WITH ORDINALITY AS connection(elem, ord)
+                ),
+            false
+        )
+            WHERE r.status = 'IN_PROGRESS'
+              AND r.type IN (
+                             'PERMIT_ISSUANCE',
+                             'PERMIT_VARIATION',
+                             'PERMIT_TRANSFER_B'
+                )
+              AND EXISTS (
+                SELECT 1
+                FROM jsonb_array_elements(
+                        r.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}'
+                     ) AS connection(elem)
+                CROSS JOIN LATERAL jsonb_array_elements_text(
+                connection.elem -> 'subInstallations'
+            ) AS sub_type(value)
+                JOIN cbam_subinstallation_migration migration
+                ON migration.account_id = r.account_id
+                    AND migration.source_value = sub_type.value
+                    AND migration.migration_status = 'PENDING'
+                );
+        </sql>
+
+
+        <!-- ===================================================== -->
+        <!-- 6. Migrate request task subInstallationType           -->
+        <!--                                                       -->
+        <!-- All relevant request_task payloads belonging to       -->
+        <!-- IN_PROGRESS requests are migrated.                    -->
+        <!-- request_action is intentionally not updated.          -->
+        <!-- ===================================================== -->
+
+        <sql>
+            UPDATE request_task rt
+            SET payload = jsonb_set(
+                    rt.payload,
+                    '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}',
+                    (
+                        SELECT jsonb_agg(
+                                       CASE
+                                           WHEN migration.target_value IS NOT NULL
+                                               THEN jsonb_set(
+                                                   si.elem,
+                                                   '{subInstallationType}',
+                                                   to_jsonb(migration.target_value::text),
+                                                   false
+                                                    )
+                                           ELSE si.elem
+                                           END
+                                           ORDER BY si.ord
+                               )
+                        FROM jsonb_array_elements(
+                                     rt.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+                             ) WITH ORDINALITY AS si(elem, ord)
+                                 LEFT JOIN cbam_subinstallation_migration migration
+                                           ON migration.account_id = r.account_id
+                                               AND migration.source_value = si.elem ->> 'subInstallationType'
+                        AND migration.migration_status = 'PENDING'
+                ),
+            false
+        )
+                FROM request r
+            WHERE r.id = rt.request_id
+              AND r.status = 'IN_PROGRESS'
+              AND r.type IN (
+                'PERMIT_ISSUANCE',
+                'PERMIT_VARIATION',
+                'PERMIT_TRANSFER_A',
+                'PERMIT_TRANSFER_B'
+                )
+              AND EXISTS (
+                SELECT 1
+                FROM cbam_subinstallation_migration migration
+                CROSS JOIN LATERAL jsonb_array_elements(
+                rt.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+                ) AS si(elem)
+                WHERE migration.account_id = r.account_id
+              AND migration.migration_status = 'PENDING'
+              AND migration.source_value = si.elem ->> 'subInstallationType'
+                );
+        </sql>
+
+
+        <!-- ===================================================== -->
+        <!-- 7. Migrate request task methodTask references         -->
+        <!-- ===================================================== -->
+
+        <sql>
+            UPDATE request_task rt
+            SET payload = jsonb_set(
+                    rt.payload,
+                    '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}',
+                    (
+                        SELECT jsonb_agg(
+                                       CASE
+                                           WHEN jsonb_exists(
+                                                   connection.elem,
+                                                   'subInstallations'
+                                                )
+                                               THEN jsonb_set(
+                                                   connection.elem,
+                                                   '{subInstallations}',
+                                                   (
+                                                       SELECT jsonb_agg(
+                                                                      to_jsonb(
+                                                                              COALESCE(
+                                                                                      migration.target_value,
+                                                                                      sub_type.value
+                                                                              )::text
+                                                                      )
+                                                                          ORDER BY sub_type.ord
+                                                              )
+                                                       FROM jsonb_array_elements_text(
+                                                                    connection.elem -> 'subInstallations'
+                                                            ) WITH ORDINALITY AS sub_type(value, ord)
+                                                                LEFT JOIN cbam_subinstallation_migration migration
+                                                                          ON migration.account_id = r.account_id
+                                                                              AND migration.source_value = sub_type.value
+                                                                              AND migration.migration_status = 'PENDING'
+                                                   ),
+                                                   false
+                                                    )
+                                           ELSE connection.elem
+                                           END
+                                           ORDER BY connection.ord
+                               )
+                        FROM jsonb_array_elements(
+                                rt.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}'
+                             ) WITH ORDINALITY AS connection(elem, ord)
+                ),
+            false
+        )
+                FROM request r
+            WHERE r.id = rt.request_id
+              AND r.status = 'IN_PROGRESS'
+              AND r.type IN (
+                'PERMIT_ISSUANCE',
+                'PERMIT_VARIATION',
+                'PERMIT_TRANSFER_A',
+                'PERMIT_TRANSFER_B'
+                )
+              AND EXISTS (
+                SELECT 1
+                FROM jsonb_array_elements(
+                rt.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}'
+                ) AS connection(elem)
+                CROSS JOIN LATERAL jsonb_array_elements_text(
+                connection.elem -> 'subInstallations'
+                ) AS sub_type(value)
+                JOIN cbam_subinstallation_migration migration
+                ON migration.account_id = r.account_id
+              AND migration.source_value = sub_type.value
+              AND migration.migration_status = 'PENDING'
+                );
+        </sql>
+
+
+        <!-- ===================================================== -->
+        <!-- 8. Final verification                                -->
+        <!--                                                       -->
+        <!-- Migration is complete only when the legacy source     -->
+        <!-- no longer exists in the completed permit or any       -->
+        <!-- current IN_PROGRESS request representation, and the   -->
+        <!-- target exists in at least one current representation. -->
+        <!--                                                       -->
+        <!-- request_action and originalPermitContainer are         -->
+        <!-- intentionally excluded.                               -->
+        <!-- ===================================================== -->
+
+        <sql>
+            UPDATE cbam_subinstallation_migration m
+            SET migration_status = 'COMPLETED',
+                migrated_date = CURRENT_TIMESTAMP,
+                error_message = NULL
+            WHERE m.migration_status = 'PENDING'
+
+            <!-- Source absent from completed permit -->
+            AND NOT EXISTS (
+              SELECT 1
+              FROM permit p
+              CROSS JOIN LATERAL jsonb_array_elements(
+                  p.data #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+              ) AS si(elem)
+              WHERE p.account_id = m.account_id
+                AND si.elem ->> 'subInstallationType' = m.source_value
+          )
+
+            <!-- Source absent from completed permit methodTask -->
+            AND NOT EXISTS (
+              SELECT 1
+              FROM permit p
+              CROSS JOIN LATERAL jsonb_array_elements(
+                  p.data #> '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}'
+              ) AS connection(elem)
+              CROSS JOIN LATERAL jsonb_array_elements_text(
+                  connection.elem -> 'subInstallations'
+              ) AS sub_type(value)
+              WHERE p.account_id = m.account_id
+                AND sub_type.value = m.source_value
+          )
+
+            <!-- Source absent from IN_PROGRESS request payload -->
+            AND NOT EXISTS (
+              SELECT 1
+              FROM request r
+              CROSS JOIN LATERAL jsonb_array_elements(
+                  r.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+              ) AS si(elem)
+              WHERE r.account_id = m.account_id
+                AND r.status = 'IN_PROGRESS'
+                AND r.type IN (
+                    'PERMIT_ISSUANCE',
+                    'PERMIT_VARIATION',
+                    'PERMIT_TRANSFER_B'
+                )
+                AND si.elem ->> 'subInstallationType' = m.source_value
+          )
+
+            <!-- Source absent from IN_PROGRESS request payload methodTask -->
+            AND NOT EXISTS (
+              SELECT 1
+              FROM request r
+              CROSS JOIN LATERAL jsonb_array_elements(
+                  r.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}'
+              ) AS connection(elem)
+              CROSS JOIN LATERAL jsonb_array_elements_text(
+                  connection.elem -> 'subInstallations'
+              ) AS sub_type(value)
+              WHERE r.account_id = m.account_id
+                AND r.status = 'IN_PROGRESS'
+                AND r.type IN (
+                    'PERMIT_ISSUANCE',
+                    'PERMIT_VARIATION',
+                    'PERMIT_TRANSFER_B'
+                )
+                AND sub_type.value = m.source_value
+          )
+
+            <!-- Source absent from IN_PROGRESS request task payload -->
+            AND NOT EXISTS (
+              SELECT 1
+              FROM request r
+              JOIN request_task rt
+                ON rt.request_id = r.id
+              CROSS JOIN LATERAL jsonb_array_elements(
+                  rt.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+              ) AS si(elem)
+              WHERE r.account_id = m.account_id
+                AND r.status = 'IN_PROGRESS'
+                AND r.type IN (
+                    'PERMIT_ISSUANCE',
+                    'PERMIT_VARIATION',
+                    'PERMIT_TRANSFER_A',
+                    'PERMIT_TRANSFER_B'
+                )
+                AND si.elem ->> 'subInstallationType' = m.source_value
+          )
+
+            <!-- Source absent from IN_PROGRESS request task methodTask -->
+            AND NOT EXISTS (
+              SELECT 1
+              FROM request r
+              JOIN request_task rt
+                ON rt.request_id = r.id
+              CROSS JOIN LATERAL jsonb_array_elements(
+                  rt.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,methodTask,connections}'
+              ) AS connection(elem)
+              CROSS JOIN LATERAL jsonb_array_elements_text(
+                  connection.elem -> 'subInstallations'
+              ) AS sub_type(value)
+              WHERE r.account_id = m.account_id
+                AND r.status = 'IN_PROGRESS'
+                AND r.type IN (
+                    'PERMIT_ISSUANCE',
+                    'PERMIT_VARIATION',
+                    'PERMIT_TRANSFER_A',
+                    'PERMIT_TRANSFER_B'
+                )
+                AND sub_type.value = m.source_value
+          )
+
+            <!-- Target exists in completed permit or an IN_PROGRESS request -->
+            AND (
+              EXISTS (
+                  SELECT 1
+                  FROM permit p
+                  CROSS JOIN LATERAL jsonb_array_elements(
+                      p.data #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+                  ) AS si(elem)
+                  WHERE p.account_id = m.account_id
+                    AND si.elem ->> 'subInstallationType' = m.target_value
+              )
+
+              OR
+
+              EXISTS (
+                  SELECT 1
+                  FROM request r
+                  CROSS JOIN LATERAL jsonb_array_elements(
+                      r.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+                  ) AS si(elem)
+                  WHERE r.account_id = m.account_id
+                    AND r.status = 'IN_PROGRESS'
+                    AND r.type IN (
+                        'PERMIT_ISSUANCE',
+                        'PERMIT_VARIATION',
+                        'PERMIT_TRANSFER_B'
+                    )
+                    AND si.elem ->> 'subInstallationType' = m.target_value
+              )
+
+              OR
+
+              EXISTS (
+                  SELECT 1
+                  FROM request r
+                  JOIN request_task rt
+                    ON rt.request_id = r.id
+                  CROSS JOIN LATERAL jsonb_array_elements(
+                      rt.payload #> '{permit,monitoringMethodologyPlans,digitizedPlan,subInstallations}'
+                  ) AS si(elem)
+                  WHERE r.account_id = m.account_id
+                    AND r.status = 'IN_PROGRESS'
+                    AND r.type IN (
+                        'PERMIT_ISSUANCE',
+                        'PERMIT_VARIATION',
+                        'PERMIT_TRANSFER_A',
+                        'PERMIT_TRANSFER_B'
+                    )
+                    AND si.elem ->> 'subInstallationType' = m.target_value
+              )
+          );
+        </sql>
+
+
+        <!-- ===================================================== -->
+        <!-- 9. Mark unexpected verification failures              -->
+        <!-- ===================================================== -->
+
+        <sql>
+            UPDATE cbam_subinstallation_migration
+            SET migration_status = 'FAILED',
+                error_message = 'Migration verification failed'
+            WHERE migration_status = 'PENDING';
+        </sql>
+
+    </changeSet>
+</databaseChangeLog>

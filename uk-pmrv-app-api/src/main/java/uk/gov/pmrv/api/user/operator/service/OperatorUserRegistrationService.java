@@ -8,6 +8,8 @@ import uk.gov.netz.api.authorization.operator.service.OperatorAuthorityService;
 import uk.gov.netz.api.common.exception.BusinessException;
 import uk.gov.netz.api.common.exception.ErrorCode;
 import uk.gov.pmrv.api.account.service.AccountQueryService;
+import uk.gov.pmrv.api.notification.template.domain.enumeration.PmrvNotificationTemplateName;
+import uk.gov.pmrv.api.user.core.service.UserEmailRateLimiter;
 import uk.gov.pmrv.api.user.operator.domain.OperatorUserDTO;
 import uk.gov.pmrv.api.user.operator.domain.OperatorUserInvitationDTO;
 import uk.gov.pmrv.api.user.operator.domain.OperatorUserRegistrationWithCredentialsDTO;
@@ -22,6 +24,7 @@ public class OperatorUserRegistrationService {
     private final OperatorUserTokenVerificationService operatorUserTokenVerificationService;
     private final AccountQueryService accountQueryService;
     private final OperatorUserNotificationGateway operatorUserNotificationGateway;
+    private final UserEmailRateLimiter userEmailRateLimiter;
 
     /**
      * Registers a new user and adds him as OPERATOR to the provided account.
@@ -77,6 +80,7 @@ public class OperatorUserRegistrationService {
     }
     
     public void sendVerificationEmail(String email) {
+        userEmailRateLimiter.consume(PmrvNotificationTemplateName.EMAIL_CONFIRMATION, email);
         operatorUserNotificationGateway.notifyEmailVerification(email);
     }
 }

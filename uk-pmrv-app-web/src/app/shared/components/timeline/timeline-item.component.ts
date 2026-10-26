@@ -15,7 +15,9 @@ import { RequestActionInfoDTO } from 'pmrv-api';
         [state]="state"
         [queryParams]="queryParams"
         govukLink
-        [hidden-text]="action | itemActionHeader: year">
+        [hidden-text]="
+          'of ' + (action | itemActionHeader: year) + ', ' + (action.creationDate | govukDate: 'datetime')
+        ">
         View details
       </a>
     </span>

@@ -2,9 +2,15 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { combineLatest, first, map, switchMap } from 'rxjs';
+import { combineLatest, first, map, Observable, switchMap } from 'rxjs';
 
-import { AerApplicationSubmitRequestTaskPayload, CalculationOfCO2Emissions } from 'pmrv-api';
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
+
+import {
+  AerApplicationSubmitRequestTaskPayload,
+  CalculationOfCO2Emissions,
+  CalculationSourceStreamEmission,
+} from 'pmrv-api';
 
 import { PendingRequestService } from '../../../../../core/guards/pending-request.service';
 import { AerService } from '../../../core/aer.service';
@@ -33,9 +39,27 @@ export class ActivityCalculationMethodComponent {
     @Inject(AER_CALCULATION_EMISSIONS_FORM) readonly form: UntypedFormGroup,
     readonly aerService: AerService,
     private readonly router: Router,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     readonly route: ActivatedRoute,
     readonly pendingRequest: PendingRequestService,
   ) {}
+
+  sourceStreamEmission$: Observable<CalculationSourceStreamEmission> = combineLatest([this.payload$, this.index$]).pipe(
+    map(([payload, index]) => {
+      return (payload.aer.monitoringApproachEmissions.CALCULATION_CO2 as CalculationOfCO2Emissions)
+        ?.sourceStreamEmissions?.[index];
+    }),
+  );
+
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
+    }),
+  );
 
   onContinue(): void {
     if (!this.form.dirty) {

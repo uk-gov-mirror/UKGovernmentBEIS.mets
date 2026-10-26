@@ -4,9 +4,9 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 
 import { combineLatest, filter, map, Observable, of, shareReplay, switchMap, take, takeUntil } from 'rxjs';
 
-import { gtagIsAvailable, toggleAnalytics } from '@core/analytics';
 import { selectIsFeatureEnabled } from '@core/config/config.selectors';
 import { ConfigStore } from '@core/config/config.store';
+import { AnalyticsService } from '@core/services/analytics.service';
 import { AuthService } from '@core/services/auth.service';
 import { DestroySubject } from '@core/services/destroy-subject.service';
 import { UserState } from '@core/store/auth';
@@ -57,7 +57,8 @@ export class AppComponent implements OnInit {
   isGatewayServiceEnabled$ = this.configStore.pipe(selectIsFeatureEnabled('serviceGatewayEnabled'));
   isSettingsEnabled$ = this.configStore.pipe(selectIsFeatureEnabled('settings'));
   showCookiesBanner$ = this.cookiesService.accepted$.pipe(
-    map((cookiesAccepted) => !cookiesAccepted && gtagIsAvailable()),
+    map((cookiesAccepted) => !cookiesAccepted),
+    take(1),
   );
   currentSelection: WritableSignal<UserState['lastLoginDomain']> = signal(null);
 
@@ -82,6 +83,7 @@ export class AppComponent implements OnInit {
     private readonly cookiesService: CookiesService,
     private readonly bulkDownloadService: BulkDownloadService,
     private readonly settingsVisibilityService: SettingsVisibilityService,
+    private readonly analyticsService: AnalyticsService,
   ) {}
 
   ngOnInit(): void {
@@ -181,8 +183,8 @@ export class AppComponent implements OnInit {
       )
       .subscribe((title: string) => this.titleService.setTitle(`${title} - GOV.UK`));
 
-    if (this.cookiesService.accepted$.getValue()) {
-      toggleAnalytics(true);
+    if (this.cookiesService.hasAnalyticsConsent()) {
+      this.analyticsService.enableGoogleTagManager();
     }
   }
 

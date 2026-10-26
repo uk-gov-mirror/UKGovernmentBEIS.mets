@@ -2,12 +2,18 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { combineLatest, first, map, switchMap, takeUntil } from 'rxjs';
+import { combineLatest, first, map, Observable, switchMap, takeUntil } from 'rxjs';
 
 import { PendingRequestService } from '@core/guards/pending-request.service';
 import { DestroySubject } from '@core/services/destroy-subject.service';
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
 
-import { AerApplicationSubmitRequestTaskPayload, ParameterMonitoringTierDiffReason } from 'pmrv-api';
+import {
+  AerApplicationSubmitRequestTaskPayload,
+  CalculationOfCO2Emissions,
+  CalculationSourceStreamEmission,
+  ParameterMonitoringTierDiffReason,
+} from 'pmrv-api';
 
 import { AerService } from '../../../../core/aer.service';
 import { AER_APPROACHES_FORM, areCalculationsTiersExtraConditionsMet, buildTaskData } from '../emissions';
@@ -34,6 +40,23 @@ export class TiersReasonComponent {
     }),
   );
 
+  sourceStreamEmission$: Observable<CalculationSourceStreamEmission> = combineLatest([this.payload$, this.index$]).pipe(
+    map(([payload, index]) => {
+      return (payload.aer.monitoringApproachEmissions?.[this.taskKey] as CalculationOfCO2Emissions)
+        ?.sourceStreamEmissions?.[index];
+    }),
+  );
+
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
+    }),
+  );
+
   usersToNotify$ = this.payload$.pipe(
     map((payload) => {
       return payload.permitOriginatedData.permitNotificationIds;
@@ -47,6 +70,7 @@ export class TiersReasonComponent {
     readonly aerService: AerService,
     private readonly router: Router,
     readonly route: ActivatedRoute,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     readonly pendingRequest: PendingRequestService,
     private readonly destroy$: DestroySubject,
   ) {}

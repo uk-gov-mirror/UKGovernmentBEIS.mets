@@ -111,7 +111,7 @@ describe('PfcComponent', () => {
         ['Approach description', 'Not started'],
         ['Cell and anode types', 'Not started'],
         ['Collection efficiency', 'Not started'],
-        ['Tier 2 - Emission factor', 'Not started'],
+        ['Emission factor', 'Not started'],
       ]);
     });
   });
@@ -210,7 +210,7 @@ describe('PfcComponent', () => {
         ['Approach description', 'Completed'],
         ['Cell and anode types', 'Completed'],
         ['Collection efficiency', 'Completed'],
-        ['Tier 2 - Emission factor', 'Completed'],
+        ['Emission factor', 'Completed'],
       ]);
     });
   });

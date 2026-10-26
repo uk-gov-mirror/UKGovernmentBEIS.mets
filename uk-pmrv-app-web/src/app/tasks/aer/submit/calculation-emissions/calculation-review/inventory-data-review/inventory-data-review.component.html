@@ -4,6 +4,7 @@
       (formSubmit)="onContinue()"
       [formGroup]="form"
       heading="Review the calculated emissions and values applied by the UK greenhouse gas inventory data"
+      [caption]="'Calculation of emissions, ' + (sourceStream$ | async)"
       [hideSubmit]="(isEditable$ | async) === false">
       @for (element of emissionsElements$ | async; track element) {
         <h2 class="govuk-heading-m">{{ element.label }}</h2>

@@ -4,9 +4,8 @@
     {{ row.reference }}
     } @case ('description') {
     {{ row.description }}
-    } @case ('change') { @if (isEditable() === true) {
-    <a [routerLink]="row.id" govukLink>Change</a>
-    } } @case ('delete') { @if (isEditable() === true) {
+    } @case ('actions') { @if (isEditable() === true) {
+    <a [routerLink]="row.id" govukLink style="margin-right: 10px">Change</a>
     <a [routerLink]="['delete', row.id]" govukLink>Delete</a>
     } } }
   </ng-template>

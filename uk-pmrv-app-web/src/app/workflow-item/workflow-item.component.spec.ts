@@ -107,16 +107,16 @@ describe('WorkflowItemComponent', () => {
         requestActionsService.getRequestActionsByRequestId.mockReturnValue(
           of([
             {
-              id: 1,
-              creationDate: '2020-08-25 10:36:15.189643',
-              submitter: 'Operator',
-              type: 'INSTALLATION_ACCOUNT_OPENING_APPLICATION_SUBMITTED',
-            },
-            {
               id: 2,
               creationDate: '2020-08-26 10:36:15.189643',
               submitter: 'Regulator',
               type: 'INSTALLATION_ACCOUNT_OPENING_ACCEPTED',
+            },
+            {
+              id: 1,
+              creationDate: '2020-08-25 10:36:15.189643',
+              submitter: 'Operator',
+              type: 'INSTALLATION_ACCOUNT_OPENING_APPLICATION_SUBMITTED',
             },
           ]),
         );
@@ -235,6 +235,65 @@ describe('WorkflowItemComponent', () => {
       });
     });
 
+    describe('display timeline for AER workflow', () => {
+      beforeEach(() => {
+        authStore = TestBed.inject(AuthStore);
+        authStore.setUserState({
+          ...authStore.getState().userState,
+          domainsLoginStatuses: { INSTALLATION: 'ENABLED' },
+          roleType: 'REGULATOR',
+          userId: 'opTestId',
+        });
+
+        requestsService.getRequestDetailsById.mockReturnValue(
+          of({
+            id: '1',
+            requestType: 'AER',
+            requestStatus: 'COMPLETED',
+            creationDate: '22-2-2022',
+          }),
+        );
+
+        requestItemsService.getItemsByRequest.mockReturnValue(of({ items: [] }));
+        requestsService.getAvailableAerWorkflows.mockReturnValue(of({}));
+
+        // The API orders the timeline, including placing the verification statement above the action
+        // that shares its minute. The component must not reorder what it receives.
+        requestActionsService.getRequestActionsByRequestId.mockReturnValue(
+          of([
+            {
+              id: 3,
+              creationDate: '2022-02-03 10:36:15.189643',
+              submitter: 'Verifier',
+              type: 'AER_APPLICATION_VERIFICATION_SUBMITTED',
+            },
+            {
+              id: 2,
+              creationDate: '2022-02-03 10:36:52.500000',
+              submitter: 'Operator',
+              type: 'AER_APPLICATION_SENT_TO_VERIFIER',
+            },
+            {
+              id: 1,
+              creationDate: '2022-02-02 10:36:15.189643',
+              submitter: 'Operator',
+              type: 'AER_APPLICATION_SUBMITTED',
+            },
+          ]),
+        );
+      });
+      beforeEach(createComponent);
+
+      it('should display the timeline in the order returned by the API', () => {
+        expect(page.timeline).toBeTruthy();
+        expect(page.timeline.map((el) => el.textContent.trim())).toEqual([
+          'Verification statement submitted to operator by Verifier',
+          'Emissions report submitted to verifier by Operator',
+          'Emissions report submitted to regulator by Operator',
+        ]);
+      });
+    });
+
     describe('do not display related create actions for AER workflow when not regulator', () => {
       beforeEach(() => {
         authStore = TestBed.inject(AuthStore);
@@ -324,16 +383,16 @@ describe('WorkflowItemComponent', () => {
         requestActionsService.getRequestActionsByRequestId.mockReturnValue(
           of([
             {
-              id: 1,
-              creationDate: '2022-02-02 10:36:15.189643',
-              submitter: 'regSubmitter',
-              type: 'BATCH_REISSUE_SUBMITTED',
-            },
-            {
               id: 2,
               creationDate: '2022-02-03 10:36:15.189643',
               submitter: 'regSubmitter',
               type: 'BATCH_REISSUE_COMPLETED',
+            },
+            {
+              id: 1,
+              creationDate: '2022-02-02 10:36:15.189643',
+              submitter: 'regSubmitter',
+              type: 'BATCH_REISSUE_SUBMITTED',
             },
           ]),
         );

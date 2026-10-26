@@ -41,6 +41,7 @@
         <div govuk-textarea formControlName="evidence" [maxLength]="10000" label="Details"></div>
 
         <app-multiple-file-input
+          headingLevel="3"
           [baseDownloadUrl]="getDownloadUrl()"
           [label]="(isFileUploaded$ | async) === true ? 'Upload a different file' : 'Upload a file (optional)'"
           listTitle="Uploaded files"

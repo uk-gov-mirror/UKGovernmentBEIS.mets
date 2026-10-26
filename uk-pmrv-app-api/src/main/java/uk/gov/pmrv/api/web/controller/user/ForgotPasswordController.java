@@ -28,6 +28,7 @@ import static uk.gov.pmrv.api.web.constants.SwaggerApiInfo.OK;
 import static uk.gov.pmrv.api.web.constants.SwaggerApiInfo.REQUEST_RESET_PASSWORD_BAD_REQUEST;
 import static uk.gov.pmrv.api.web.constants.SwaggerApiInfo.RESET_PASSWORD_BAD_REQUEST;
 import static uk.gov.pmrv.api.web.constants.SwaggerApiInfo.TOKEN_VERIFICATION_BAD_REQUEST;
+import static uk.gov.pmrv.api.web.constants.SwaggerApiInfo.TOO_MANY_REQUESTS;
 
 @RestController
 @RequestMapping(path = "/v1.0/users/forgot-password")
@@ -47,6 +48,7 @@ public class ForgotPasswordController {
     @Operation(summary = "Sends a reset password email")
     @ApiResponse(responseCode = "204", description = NO_CONTENT)
     @ApiResponse(responseCode = "400", description = REQUEST_RESET_PASSWORD_BAD_REQUEST, content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))})
+    @ApiResponse(responseCode = "429", description = TOO_MANY_REQUESTS, content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))})
     @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR, content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ErrorResponse.class))})
     public ResponseEntity<Void> sendResetPasswordEmail(
         @RequestBody @Valid @Parameter(description = "The user email", required = true) EmailDTO emailDTO) {

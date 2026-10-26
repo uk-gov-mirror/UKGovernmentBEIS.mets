@@ -3,8 +3,7 @@
     [columns]="(isEditable$ | async) ? editableCols : nonEditableCols"
     [form]="verifiersForm"
     [users]="verifiers$"
-    appUsersTable
-  >
+    appUsersTable>
     <ng-template let-column="column" let-index="index" let-row="row">
       <ng-container formArrayName="verifiersArray">
         <div [formGroupName]="index" [ngSwitch]="column.field" class="cell-container">
@@ -13,8 +12,7 @@
               *ngIf="
                 ((isEditable$ | async) && row.authorityStatus !== 'PENDING') || row.userId === (userId$ | async);
                 else bareName
-              "
-            >
+              ">
               <ng-container *ngIf="verifierUserLink; else noLink">
                 <a [routerLink]="[verifierUserLink, row.userId]">{{ row | userFullName }}</a>
               </ng-container>
@@ -32,8 +30,7 @@
               [options]="roleCodes"
               formControlName="roleCode"
               govuk-select
-              widthClass="govuk-!-width-full"
-            ></div>
+              widthClass="govuk-!-width-full"></div>
           </ng-container>
           <ng-container *ngSwitchCase="'authorityStatus'">
             <ng-container *ngIf="row.authorityStatus !== 'PENDING'; else bareStatus">
@@ -41,14 +38,16 @@
                 [options]="row.authorityStatus === 'ACCEPTED' ? authorityStatusesAccepted : authorityStatuses"
                 formControlName="authorityStatus"
                 govuk-select
-                widthClass="govuk-!-width-full"
-              ></div>
+                widthClass="govuk-!-width-full"></div>
             </ng-container>
           </ng-container>
           <ng-container *ngSwitchCase="'deleteBtn'">
-            <a [routerLink]="[(domainUrlPrefix$ | async) + '/user/verifiers', row.userId, 'delete']" govukLink
-              >Delete</a
-            >
+            <a
+              [routerLink]="[(domainUrlPrefix$ | async) + '/user/verifiers', row.userId, 'delete']"
+              govukLink
+              [hidden-text]="row | userFullName">
+              Delete
+            </a>
           </ng-container>
         </div>
         <ng-template #bareField>{{ row[column.field] | titlecase }}</ng-template>

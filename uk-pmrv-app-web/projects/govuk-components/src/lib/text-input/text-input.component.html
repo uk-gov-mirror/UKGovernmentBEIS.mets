@@ -38,6 +38,7 @@
     (focus)="onFocus()"
     (input)="onChange(getInputValue($event))"
     (keydown)="onKeyDown($event)"
+    [attr.aria-describedby]="ariaDescribedBy"
     [attr.inputmode]="inputMode()"
     [attr.maxlength]="maxLength() ?? null"
     [autocomplete]="autoComplete()"

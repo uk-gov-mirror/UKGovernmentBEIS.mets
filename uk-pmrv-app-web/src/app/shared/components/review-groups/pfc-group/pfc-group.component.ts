@@ -56,7 +56,7 @@ export class PfcGroupComponent implements OnInit {
       );
 
       const sourceStreamDescription = aerSourceStream?.reference
-        ? `${aerSourceStream.reference} ${sourceStreamDescriptionPipe.transform(aerSourceStream.description)}`
+        ? `${aerSourceStream.reference} ${sourceStreamDescriptionPipe.transform(aerSourceStream)}`
         : null;
 
       const emissionSources = sourceStreamEmission.emissionSources?.map(

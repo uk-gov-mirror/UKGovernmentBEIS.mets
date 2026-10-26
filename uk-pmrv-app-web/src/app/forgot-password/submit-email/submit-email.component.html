@@ -1,5 +1,6 @@
 <ng-container *ngIf="!isEmailSent; else emailSent">
   <form (ngSubmit)="onSubmit()" [formGroup]="form">
+    <govuk-error-summary *ngIf="isSummaryDisplayed" [form]="form"></govuk-error-summary>
     <h1 class="govuk-heading-l">Reset my password</h1>
     <p class="govuk-body">We'll send you a link to reset your password. The link will expire after 20 minutes.</p>
     <div

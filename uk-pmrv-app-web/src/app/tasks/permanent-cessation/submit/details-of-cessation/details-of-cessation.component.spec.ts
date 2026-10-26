@@ -141,6 +141,18 @@ describe('DetailsOfCessationComponent', () => {
       fixture.detectChanges();
     });
 
+    it('should associate the date of cessation inputs with the format hint via aria-describedby', () => {
+      expect(page.query<HTMLDivElement>('#cessationDate-hint').textContent.trim()).toEqual(
+        'Must be today or in the past',
+      );
+
+      ['day', 'month', 'year'].forEach((part) =>
+        expect(page.query<HTMLInputElement>(`#cessationDate-${part}`).getAttribute('aria-describedby')).toEqual(
+          'cessationDate-hint',
+        ),
+      );
+    });
+
     it('should submit and check for errors', () => {
       page.submitButton.click();
       fixture.detectChanges();

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { map, Observable, tap } from 'rxjs';
 
-import { selectIsFeatureEnabled, selectMeasurementId, selectPropertyId } from '@core/config/config.selectors';
+import { selectIsFeatureEnabled } from '@core/config/config.selectors';
 import { ConfigState, FeatureName } from '@core/config/config.state';
 import { ConfigStore } from '@core/config/config.store';
 
@@ -24,12 +24,5 @@ export class ConfigService {
 
   isFeatureEnabled(feature: FeatureName): Observable<boolean> {
     return this.store.pipe(selectIsFeatureEnabled(feature));
-  }
-
-  getMeasurementId(): Observable<string> {
-    return this.store.pipe(selectMeasurementId);
-  }
-  getPropertyId(): Observable<string> {
-    return this.store.pipe(selectPropertyId);
   }
 }

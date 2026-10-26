@@ -11,9 +11,7 @@ import { PermitApplicationStore } from '../../../../store/permit-application.sto
     <app-permit-task
       [notification]="notification"
       [breadcrumb]="[{ text: 'CALCULATION_PFC' | monitoringApproachDescription, link: ['pfc'] }]">
-      <app-page-heading [caption]="'CALCULATION_PFC' | monitoringApproachDescription">
-        Tier 2 - Emission factor
-      </app-page-heading>
+      <app-page-heading [caption]="'CALCULATION_PFC' | monitoringApproachDescription">Emission factor</app-page-heading>
       <app-emission-factor-summary-details
         [emissionFactor]="('CALCULATION_PFC' | monitoringApproachTask | async).tier2EmissionFactor"
         [changePerStage]="true"

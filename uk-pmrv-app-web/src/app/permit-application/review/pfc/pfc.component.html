@@ -104,7 +104,7 @@
     <li
       app-task-item
       link="../../pfc/emission-factor/summary"
-      linkText="Tier 2 - Emission factor"
+      linkText="Emission factor"
       [status]="'CALCULATION_PFC_Tier2EmissionFactor' | taskStatus | async">
       <app-emission-factor-summary-details
         *ngIf="('CALCULATION_PFC_Tier2EmissionFactor' | taskStatus | async) === 'complete'"

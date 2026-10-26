@@ -62,6 +62,7 @@ describe('ComplianceEtsComponent', () => {
         'Monitoring Plan requirements met?',
         'EU Regulation on Monitoring and reporting met?',
         'Data verified in detail and back to source',
+        'Was this part of site verification?',
         'Control activities are documented, implemented, maintained and effective to mitigate the inherent risks?',
         'Procedures listed in monitoring plan are documented, implemented, maintained and effective to mitigate the inherent risks and control risks?',
         'Data verification completed as required?',

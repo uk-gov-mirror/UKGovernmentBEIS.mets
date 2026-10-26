@@ -11,6 +11,7 @@ import { AerApplicationVerificationSubmitRequestTaskPayload } from 'pmrv-api';
   standalone: false,
   template: `
     <app-page-heading>{{ 'CALCULATION_CO2' | monitoringApproachEmissionDescription }}</app-page-heading>
+    <app-include-calc-measurement-info></app-include-calc-measurement-info>
     <app-calculation-emissions-group [data]="aerData$ | async"></app-calculation-emissions-group>
     <app-return-link></app-return-link>
   `,

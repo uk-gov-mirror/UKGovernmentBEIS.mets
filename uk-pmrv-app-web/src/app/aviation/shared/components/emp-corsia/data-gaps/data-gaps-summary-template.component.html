@@ -6,20 +6,22 @@
         <dd class="pre-wrap" govukSummaryListRowValue>
           {{ data.secondaryDataSources }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a govukLink routerLink="../secondary-data-sources" [queryParams]="{ change: true }">Change</a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a govukLink routerLink="../secondary-data-sources" [queryParams]="{ change: true }">Change</a>
+          </dd>
+        }
       </div>
       <div govukSummaryListRow>
         <dt govukSummaryListRowKey>Handling of data gaps and erroneous data values</dt>
         <dd class="pre-wrap" govukSummaryListRowValue>
           {{ data.dataGaps }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a govukLink routerLink="../" [queryParams]="{ change: true }">Change</a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a govukLink routerLink="../" [queryParams]="{ change: true }">Change</a>
+          </dd>
+        }
       </div>
       <div govukSummaryListRow>
         <dt govukSummaryListRowKey>
@@ -28,20 +30,22 @@
         <dd class="pre-wrap" govukSummaryListRowValue>
           {{ data.secondarySourcesDataGapsExist ? 'Yes' : 'No' }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a govukLink routerLink="../secondary-data-sources-exist" [queryParams]="{ change: true }">Change</a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a govukLink routerLink="../secondary-data-sources-exist" [queryParams]="{ change: true }">Change</a>
+          </dd>
+        }
       </div>
       <div govukSummaryListRow *ngIf="data.secondarySourcesDataGapsExist">
         <dt govukSummaryListRowKey>Describe the conditions where this occurs</dt>
         <dd class="pre-wrap" govukSummaryListRowValue>
           {{ data.secondarySourcesDataGapsConditions }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a govukLink routerLink="../secondary-data-sources-exist" [queryParams]="{ change: true }">Change</a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a govukLink routerLink="../secondary-data-sources-exist" [queryParams]="{ change: true }">Change</a>
+          </dd>
+        }
       </div>
     </dl>
   </ng-container>
@@ -55,10 +59,11 @@
         <dd class="pre-wrap" govukSummaryListRowValue>
           {{ data.dataGaps }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a govukLink routerLink="../" [queryParams]="{ change: true }">Change</a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a govukLink routerLink="../" [queryParams]="{ change: true }">Change</a>
+          </dd>
+        }
       </div>
 
       <div govukSummaryListRow>
@@ -66,10 +71,11 @@
         <dd class="pre-wrap" govukSummaryListRowValue>
           {{ data.secondaryDataSources }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a govukLink routerLink="../secondary-data-sources" [queryParams]="{ change: true }">Change</a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a govukLink routerLink="../secondary-data-sources" [queryParams]="{ change: true }">Change</a>
+          </dd>
+        }
       </div>
       <div govukSummaryListRow>
         <dt govukSummaryListRowKey>
@@ -78,20 +84,22 @@
         <dd class="pre-wrap" govukSummaryListRowValue>
           {{ data.secondarySourcesDataGapsExist ? 'Yes' : 'No' }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a govukLink routerLink="../secondary-data-sources-exist" [queryParams]="{ change: true }">Change</a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a govukLink routerLink="../secondary-data-sources-exist" [queryParams]="{ change: true }">Change</a>
+          </dd>
+        }
       </div>
       <div govukSummaryListRow *ngIf="data.secondarySourcesDataGapsExist">
         <dt govukSummaryListRowKey>Describe the conditions where this occurs</dt>
         <dd class="pre-wrap" govukSummaryListRowValue>
           {{ data.secondarySourcesDataGapsConditions }}
         </dd>
-        <dd></dd>
-        <dd govukSummaryListRowActions *ngIf="isEditable">
-          <a govukLink routerLink="../secondary-data-sources-exist" [queryParams]="{ change: true }">Change</a>
-        </dd>
+        @if (isEditable) {
+          <dd govukSummaryListRowActions>
+            <a govukLink routerLink="../secondary-data-sources-exist" [queryParams]="{ change: true }">Change</a>
+          </dd>
+        }
       </div>
     </dl>
   </ng-template>

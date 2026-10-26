@@ -646,6 +646,15 @@ describe('ItemActionTypePipe', () => {
     expect(pipe.transform('NER_APPLICATION_DEEMED_WITHDRAWN')).toEqual('Withdrawn');
     expect(pipe.transform('NER_APPLICATION_COMPLETED')).toEqual('Completed');
     expect(pipe.transform('NER_APPLICATION_RE_INITIATED')).toEqual('Reopened');
+    expect(pipe.transform('NER_APPLICATION_PROCEEDED_TO_AUTHORITY')).toEqual(
+      'New entrant reserve application proceeded to authority',
+    );
+    expect(pipe.transform('NER_APPLICATION_ACCEPTED')).toEqual('New entrant reserve application accepted');
+    expect(pipe.transform('NER_APPLICATION_ACCEPTED_WITH_CORRECTIONS')).toEqual(
+      'New entrant reserve application accepted with corrections',
+    );
+    expect(pipe.transform('NER_APPLICATION_REJECTED')).toEqual('New entrant reserve application rejected');
+    expect(pipe.transform('DRE_APPLICATION_SUBMITTED')).toEqual('Reportable emissions updated');
 
     expect(pipe.transform(undefined)).toEqual('Approved Application');
   });

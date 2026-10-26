@@ -4,6 +4,7 @@
       (formSubmit)="onContinue()"
       [formGroup]="form"
       heading="What tiers have you used for this source stream’s calculation parameters?"
+      [caption]="'Calculation of emissions, ' + (sourceStream$ | async)"
       [hideSubmit]="(isEditable$ | async) === false">
       <ng-container *ngFor="let element of formElements">
         <h2 class="govuk-heading-m">{{ element.label }}</h2>

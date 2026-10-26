@@ -4,16 +4,15 @@
       (formSubmit)="onContinue()"
       [formGroup]="form"
       heading="Provide the emission calculation values for this source stream"
-      [hideSubmit]="(isEditable$ | async) === false"
-    >
+      [caption]="'Calculation of emissions, ' + (sourceStream$ | async)"
+      [hideSubmit]="(isEditable$ | async) === false">
       <ng-container *ngFor="let element of formElements">
         <h2 class="govuk-heading-m">{{ element.label }}</h2>
         <div
           [formControlName]="element.emissionParameterName"
           govuk-text-input
           label="Value"
-          widthClass="govuk-input--width-10"
-        ></div>
+          widthClass="govuk-input--width-10"></div>
 
         <ng-container *ngIf="element?.measurementUnits?.values?.length > 0">
           <div
@@ -21,8 +20,7 @@
             [formControlName]="element?.measurementUnits?.name"
             govuk-select
             label="Measurement units applied"
-            inputType="number"
-          ></div>
+            inputType="number"></div>
         </ng-container>
         <br />
       </ng-container>
@@ -36,8 +34,7 @@
           inputType="number"
           hint="The ratio of carbon stemming from biomass to the total carbon content of a fuel or material."
           suffix="%"
-          widthClass="govuk-input--width-10"
-        ></div>
+          widthClass="govuk-input--width-10"></div>
         <br />
 
         <div
@@ -47,12 +44,11 @@
           inputType="number"
           hint="The ratio of carbon stemming from non-sustainable biomass to the total carbon content of a fuel or material."
           suffix="%"
-          widthClass="govuk-input--width-10"
-        ></div>
+          widthClass="govuk-input--width-10"></div>
         <br />
       </ng-container>
     </app-wizard-step>
 
-    <a govukLink routerLink="../..">Return to: {{ 'CALCULATION_CO2' | monitoringApproachEmissionDescription }} </a>
+    <a govukLink routerLink="../..">Return to: {{ 'CALCULATION_CO2' | monitoringApproachEmissionDescription }}</a>
   </ng-container>
 </app-aer-task>

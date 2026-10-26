@@ -2,6 +2,7 @@ package uk.gov.pmrv.api.reporting.repository;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,4 +25,9 @@ public interface NationalInventoryDataRepository extends JpaRepository<NationalI
 
     @Transactional(readOnly = true)
     boolean existsByReportingYear(Year reportingYear);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("DELETE FROM NationalInventoryData n WHERE n.reportingYear = :reportingYear")
+    void deleteByReportingYear(Year reportingYear);
 }

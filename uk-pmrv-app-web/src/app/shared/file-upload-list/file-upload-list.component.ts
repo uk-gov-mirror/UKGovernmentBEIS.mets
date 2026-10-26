@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, numberAttribute, Output } from '@angular/core';
 
 import { FileUploadEvent } from '../file-input/file-upload-event';
 
@@ -11,6 +11,7 @@ import { FileUploadEvent } from '../file-input/file-upload-event';
 })
 export class FileUploadListComponent {
   @Input() headerSize: 'm' | 's' = 'm';
+  @Input({ transform: numberAttribute }) headingLevel = 2;
   @Input() listTitle: string;
   @Input() files: FileUploadEvent[] = [];
   @Input() isDisabled = false;

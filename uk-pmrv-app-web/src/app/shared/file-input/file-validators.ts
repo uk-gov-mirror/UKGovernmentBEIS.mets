@@ -84,12 +84,10 @@ export class FileValidators {
         );
   }
 
-  static multipleCompose(
-    validator: ({ value }: { value: FileUploadEvent }) => MessageValidationErrors,
-  ): MessageValidatorFn {
+  static multipleCompose(validator: MessageValidatorFn): MessageValidatorFn {
     return (control) => {
       const value: FileUploadEvent[] | null = control.value;
-      const fileValidities = value?.map((fileEvent) => validator({ value: fileEvent }));
+      const fileValidities = value?.map((fileEvent) => validator({ value: fileEvent } as AbstractControl));
 
       return this.concatenateErrors(fileValidities);
     };

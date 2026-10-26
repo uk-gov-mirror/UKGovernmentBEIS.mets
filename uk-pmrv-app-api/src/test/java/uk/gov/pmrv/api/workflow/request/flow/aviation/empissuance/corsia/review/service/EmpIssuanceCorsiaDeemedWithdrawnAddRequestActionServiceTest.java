@@ -1,21 +1,18 @@
 package uk.gov.pmrv.api.workflow.request.flow.aviation.empissuance.corsia.review.service;
 
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Map;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.pmrv.api.account.aviation.domain.dto.ServiceContactDetails;
 import uk.gov.pmrv.api.workflow.request.core.domain.Request;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestActionPayloadType;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestActionType;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestPayloadType;
 import uk.gov.pmrv.api.workflow.request.core.service.RequestService;
+import uk.gov.pmrv.api.workflow.request.flow.aviation.common.domain.RequestAviationAccountInfo;
+import uk.gov.pmrv.api.workflow.request.flow.aviation.common.service.RequestAviationAccountQueryService;
 import uk.gov.pmrv.api.workflow.request.flow.aviation.empissuance.common.domain.EmpIssuanceDetermination;
 import uk.gov.pmrv.api.workflow.request.flow.aviation.empissuance.common.domain.EmpIssuanceDeterminationType;
 import uk.gov.pmrv.api.workflow.request.flow.aviation.empissuance.corsia.review.domain.EmpIssuanceCorsiaApplicationDeemedWithdrawnRequestActionPayload;
@@ -23,6 +20,13 @@ import uk.gov.pmrv.api.workflow.request.flow.aviation.empissuance.corsia.submit.
 import uk.gov.pmrv.api.workflow.request.flow.common.domain.DecisionNotification;
 import uk.gov.pmrv.api.workflow.request.flow.common.domain.dto.RequestActionUserInfo;
 import uk.gov.pmrv.api.workflow.request.flow.common.service.RequestActionUserInfoResolver;
+
+import java.util.Map;
+import java.util.Set;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EmpIssuanceCorsiaDeemedWithdrawnAddRequestActionServiceTest {
@@ -35,6 +39,9 @@ class EmpIssuanceCorsiaDeemedWithdrawnAddRequestActionServiceTest {
 
     @Mock
     private RequestActionUserInfoResolver requestActionUserInfoResolver;
+
+    @Mock
+    private RequestAviationAccountQueryService requestAviationAccountQueryService;
 
     @Test
     void addRequestAction() {
@@ -59,6 +66,20 @@ class EmpIssuanceCorsiaDeemedWithdrawnAddRequestActionServiceTest {
             "regulatorUser", RequestActionUserInfo.builder().name("regulatorUserName").build()
         );
 
+        ServiceContactDetails serviceContactDetails = ServiceContactDetails.builder()
+                .name("name")
+                .email("email")
+                .build();
+
+        RequestAviationAccountInfo accountInfo = RequestAviationAccountInfo.builder()
+                .operatorName("operatorName")
+                .crcoCode("crcoCode")
+                .serviceContactDetails(serviceContactDetails)
+                .build();
+
+        when(requestAviationAccountQueryService.getAccountInfo(request.getAccountId())).thenReturn(accountInfo);
+
+
         when(requestService.findRequestById(requestId)).thenReturn(request);
         when(requestActionUserInfoResolver.getUsersInfo(operatorsNotified, regulatorUser, request)).thenReturn(usersInfo);
 
@@ -73,6 +94,7 @@ class EmpIssuanceCorsiaDeemedWithdrawnAddRequestActionServiceTest {
             .decisionNotification(decisionNotification)
             .determination(determination)
             .usersInfo(usersInfo)
+            .serviceContactDetails(serviceContactDetails)
             .build();
 
         verify(requestService, times(1))

@@ -1,13 +1,17 @@
 package uk.gov.pmrv.api.workflow.request.core.domain.enumeration;
 
+import lombok.Getter;
+
 /**
  * Request Action Types.
  */
+@Getter
 public enum RequestActionType {
 
-    //Reportable emissions
-    INSTALLATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY,
-    AVIATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY,
+    //Reportable emissions. They can be sent to the registry right before the action of the workflow step that sends
+    //them is added so their timeline order displays them above that action.
+    INSTALLATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY(1),
+    AVIATION_REPORTABLE_EMISSIONS_SENT_TO_REGISTRY(1),
 
     // Installation Account relevant request actions
     INSTALLATION_ACCOUNT_OPENING_APPLICATION_SUBMITTED,
@@ -439,5 +443,20 @@ public enum RequestActionType {
     AVIATION_AER_CORSIA_3YEAR_PERIOD_OFFSETTING_APPLICATION_SUBMITTED,
 
     NOTIFICATION_SENT_TO_REGISTRY,
-    RETURN_OF_ALLOWANCES_NOTIFICATION_SENT_TO_REGISTRY,
+    RETURN_OF_ALLOWANCES_NOTIFICATION_SENT_TO_REGISTRY;
+
+    /**
+     * The logical order of the action among the actions created at virtually the same time e.g. by the same workflow
+     * step. The timeline displays an action above the actions of a lower order created right after it  as if it had
+     * been created after them.
+     */
+    private final int timelineOrder;
+
+    RequestActionType() {
+        this(0);
+    }
+
+    RequestActionType(int timelineOrder) {
+        this.timelineOrder = timelineOrder;
+    }
 }

@@ -3,6 +3,7 @@
     (formSubmit)="onContinue()"
     [formGroup]="form"
     heading="How do you want to calculate the parameter values for this source stream?"
+    [caption]="'Calculation of emissions, ' + (sourceStream$ | async)"
     [hideSubmit]="(isEditable$ | async) === false">
     <p class="govuk-body">
       The Monitoring and Reporting Regulation allows nationally reported data to be used as default factors if the

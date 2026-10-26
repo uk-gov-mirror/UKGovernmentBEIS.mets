@@ -93,6 +93,9 @@ class PermitVariationRequestPaymentActionHandlerTest {
         assertThat(requestPayload.getRequestPaymentDetails())
                 .isEqualTo(paymentDetails);
 
+        assertThat(requestPayload.getPaymentCompleted())
+                .isEqualTo(false);
+
         assertThat(paymentDetails.getManualPaymentInitiationPending())
                 .isTrue();
 

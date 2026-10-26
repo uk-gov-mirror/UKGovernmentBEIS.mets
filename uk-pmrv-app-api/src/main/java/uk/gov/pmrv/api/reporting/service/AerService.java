@@ -3,6 +3,8 @@ package uk.gov.pmrv.api.reporting.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.netz.api.common.exception.BusinessException;
+import uk.gov.pmrv.api.common.exception.MetsErrorCode;
 import uk.gov.pmrv.api.reporting.domain.AerContainer;
 import uk.gov.pmrv.api.reporting.domain.AerEntity;
 import uk.gov.pmrv.api.reporting.domain.AerSubmitParams;
@@ -50,6 +52,9 @@ public class AerService {
         Long accountId = params.getAccountId();
         Year reportingYear = aerContainer.getReportingYear();
         BigDecimal reportableEmissions = reportableEmissionsCalculationService.calculateYearEmissions(aerContainer);
+        if (reportableEmissions.signum() < 0) {
+            throw new BusinessException(MetsErrorCode.AER_NEGATIVE_TOTAL_EMISSIONS);
+        }
 
         ReportableEmissionsSaveParams emissionsParams = ReportableEmissionsSaveParams.builder()
             .accountId(accountId)

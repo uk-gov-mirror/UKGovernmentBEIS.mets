@@ -3,6 +3,7 @@
     (formSubmit)="onContinue()"
     [formGroup]="form"
     heading="How do you want to calculate the activity data for this source stream?"
+    [caption]="'Calculation of emissions, ' + (sourceStream$ | async)"
     [hideSubmit]="(isEditable$ | async) === false">
     <p class="govuk-body">
       Activity data is the amount of fuels or materials consumed by the selected emission sources.

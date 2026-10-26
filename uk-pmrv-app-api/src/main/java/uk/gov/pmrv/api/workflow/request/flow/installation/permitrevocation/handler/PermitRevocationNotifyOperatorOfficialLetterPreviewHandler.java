@@ -7,11 +7,15 @@ import uk.gov.pmrv.api.notification.template.domain.enumeration.DocumentTemplate
 import uk.gov.pmrv.api.notification.template.service.DocumentFileGeneratorService;
 import uk.gov.pmrv.api.workflow.request.core.domain.Request;
 import uk.gov.pmrv.api.workflow.request.core.domain.RequestTask;
+import uk.gov.pmrv.api.workflow.request.core.domain.RequestTaskPayload;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestTaskType;
 import uk.gov.pmrv.api.workflow.request.core.service.RequestTaskService;
 import uk.gov.pmrv.api.workflow.request.flow.common.domain.DecisionNotification;
 import uk.gov.pmrv.api.workflow.request.flow.common.service.PreviewDocumentAbstractHandler;
 import uk.gov.pmrv.api.workflow.request.flow.installation.common.service.notification.InstallationPreviewOfficialNoticeService;
+import uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.domain.PermitRevocation;
+import uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.domain.PermitRevocationApplicationPeerReviewRequestTaskPayload;
+import uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.domain.PermitRevocationApplicationSubmitRequestTaskPayload;
 import uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.domain.PermitRevocationRequestPayload;
 import uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.service.notification.PermitRevocationDocumentTemplateWorkflowParamsProvider;
 
@@ -38,13 +42,26 @@ public class PermitRevocationNotifyOperatorOfficialLetterPreviewHandler extends 
         final RequestTask requestTask = requestTaskService.findTaskById(taskId);
         final Request request = requestTask.getRequest();
         final TemplateParams templateParams = previewOfficialNoticeService.generateCommonParamsWithExtraAccountDetails(request, decisionNotification);
-        final Map<String, Object> params = workflowParamsProvider.constructParams((PermitRevocationRequestPayload) request.getPayload(), null);
+
+        final PermitRevocationRequestPayload requestPayload = (PermitRevocationRequestPayload) request.getPayload();
+        final PermitRevocationRequestPayload previewPayload = PermitRevocationRequestPayload.builder()
+                .permitRevocation(getPermitRevocation(requestTask.getPayload()))
+                .paymentAmount(requestPayload.getPaymentAmount())
+                .build();
+        final Map<String, Object> params = workflowParamsProvider.constructParams(previewPayload, null);
         templateParams.getParams().putAll(params);
 
         return documentFileGeneratorService.generateFileDocument(
                 DocumentTemplateType.PERMIT_REVOCATION,
                 templateParams,
                 "permit_revocation_notice.pdf");
+    }
+
+    private PermitRevocation getPermitRevocation(final RequestTaskPayload taskPayload) {
+        if (taskPayload instanceof PermitRevocationApplicationPeerReviewRequestTaskPayload peerReviewTaskPayload) {
+            return peerReviewTaskPayload.getPermitRevocation();
+        }
+        return ((PermitRevocationApplicationSubmitRequestTaskPayload) taskPayload).getPermitRevocation();
     }
 
     @Override

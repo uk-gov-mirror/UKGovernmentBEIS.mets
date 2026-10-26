@@ -17,6 +17,7 @@
     <div class="govuk-grid-column-two-thirds">
       <h2 class="govuk-heading-m">Upload additional evidence (optional)</h2>
       <app-multiple-file-input
+        headingLevel="3"
         [baseDownloadUrl]="getDownloadUrl()"
         [label]="(isFileUploaded$ | async) ? 'Upload a different file' : 'Upload a file (optional)'"
         formControlName="files"

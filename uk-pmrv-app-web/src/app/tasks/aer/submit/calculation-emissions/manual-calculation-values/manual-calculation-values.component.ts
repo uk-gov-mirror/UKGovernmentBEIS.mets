@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { combineLatest, filter, first, map, Observable, shareReplay, switchMap, withLatestFrom } from 'rxjs';
 
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
+
 import { GovukValidators } from 'govuk-components';
 
 import {
@@ -44,6 +46,16 @@ export class ManualCalculationValuesComponent {
     }),
   );
 
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
+    }),
+  );
+
   sourceStreamType$: Observable<SourceStream['type']> = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
     map(
       ([payload, sourceStreamEmission]) =>
@@ -73,6 +85,7 @@ export class ManualCalculationValuesComponent {
     private readonly router: Router,
     readonly route: ActivatedRoute,
     readonly pendingRequest: PendingRequestService,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     readonly reportingService: ReportingService,
     readonly reportingDataService: ReportingDataService,
   ) {}

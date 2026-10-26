@@ -1,6 +1,7 @@
+import { isCalculationTotalReportableEmissionsNegative } from '@shared/components/approaches/aer/monitoring-approaches.functions';
 import { TaskItemStatus } from '@shared/task-list/task-list.interface';
 
-import { AerApplicationSubmitRequestTaskPayload } from 'pmrv-api';
+import { AerApplicationSubmitRequestTaskPayload, CalculationOfCO2Emissions } from 'pmrv-api';
 
 export function sourceStreamEmissionStatus(taskKey, payload, sourceStreamEmissionIndex): TaskItemStatus {
   const sourceStreamEmissionValid = isSourceStreamEmissionValid(taskKey, payload, sourceStreamEmissionIndex);
@@ -41,7 +42,11 @@ export function getSourceStreamsStatus(taskKey, payload: AerApplicationSubmitReq
 
   return !payload.aerSectionsCompleted['emissionSources']?.[0] || !payload.aerSectionsCompleted['sourceStreams']?.[0]
     ? 'cannot start yet'
-    : sourceStreamEmissionsStatuses.find((status) => status === 'needs review')
+    : sourceStreamEmissionsStatuses.find((status) => status === 'needs review') ||
+        (taskKey === 'CALCULATION_CO2' &&
+          isCalculationTotalReportableEmissionsNegative(
+            payload.aer?.monitoringApproachEmissions?.[taskKey] as CalculationOfCO2Emissions,
+          ))
       ? 'needs review'
       : !!sourceStreamEmissionsStatuses.length && sourceStreamEmissionsStatuses.every((status) => status === 'complete')
         ? 'complete'

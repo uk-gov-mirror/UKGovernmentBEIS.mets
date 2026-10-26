@@ -1567,6 +1567,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '500':
           description: Internal Server Error
           content:
@@ -2217,12 +2223,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                  format: decimal
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                  format: decimal
   /v1.0/regulator-users:
     post:
       tags:
@@ -2565,6 +2583,12 @@ paths:
           description: No Content
         '400':
           description: "Bad Request\t\n Error Code | Description \t\nFORM1001 | Form validation failed"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too Many Requests
           content:
             application/json:
               schema:
@@ -3149,6 +3173,124 @@ paths:
             '*/*':
               schema:
                 type: string
+  /v1.0/installation/settings/emission-factors:
+    get:
+      tags:
+        - Settings
+      summary: >-
+        Retrieves the list of emission factors entries sorted by reference year
+        descending
+      operationId: getEmissionFactors
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmissionFactorsHistoryEntryDTO'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Settings
+      summary: >-
+        Validates and parses an emission factors xlsx file for the given
+        reference year and keeps it as a pending upload until it is submitted
+      operationId: uploadEmissionFactors
+      parameters:
+        - name: referenceYear
+          in: query
+          description: The reference year
+          required: true
+          schema:
+            maximum: 2100
+            minimum: 2000
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: The emission factors xlsx file
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmissionFactorsUploadDTO'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1.0/installation/settings/emission-factors/uploads/{fileUuid}/submit:
+    post:
+      tags:
+        - Settings
+      summary: >-
+        Submits the data of a pending upload, making it the emission factors of
+        its reference year
+      operationId: submitEmissionFactors
+      parameters:
+        - name: fileUuid
+          in: path
+          description: The file uuid returned by the upload
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No content
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1.0/installation/accounts/{id}/sop-id:
     post:
       tags:
@@ -4298,12 +4440,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/AviationReportableEmissionsDTO'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/AviationReportableEmissionsDTO'
   /v1.0/aviation-reporting-data/airports:
     post:
       tags:
@@ -5104,6 +5256,7 @@ paths:
                 items:
                   type: string
                   enum:
+                    - EMISSION_FACTORS
                     - FEES
         '403':
           description: Forbidden
@@ -7044,18 +7197,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/RequestCreateValidationResult'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/RequestCreateValidationResult'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/RequestCreateValidationResult'
   /v1.0/requests/available-workflows/permit/{accountId}:
     get:
       tags:
@@ -7085,18 +7253,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/RequestCreateValidationResult'
         '404':
           description: Not Found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/RequestCreateValidationResult'
         '500':
           description: Internal Server Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/RequestCreateValidationResult'
   /v1.0/request-notes/{requestId}/files:
     get:
       tags:
@@ -8205,6 +8388,134 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1.0/installation/settings/emission-factors/{referenceYear}:
+    get:
+      tags:
+        - Settings
+      summary: Retrieves the emission factors detail data for the given reference year
+      operationId: getEmissionFactorsDetail
+      parameters:
+        - name: referenceYear
+          in: path
+          description: The reference year
+          required: true
+          schema:
+            maximum: 2100
+            minimum: 2000
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmissionFactorsDetailDTO'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1.0/installation/settings/emission-factors/{referenceYear}/file:
+    get:
+      tags:
+        - Settings
+      summary: >-
+        Generates a token to download the emission factors file for the given
+        reference year
+      operationId: generateGetEmissionFactorsFileToken
+      parameters:
+        - name: referenceYear
+          in: path
+          description: The reference year
+          required: true
+          schema:
+            maximum: 2100
+            minimum: 2000
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileToken'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1.0/installation/settings/emission-factors/history:
+    get:
+      tags:
+        - Settings
+      summary: >-
+        Retrieves the paginated history of submitted emission factors updates,
+        newest first
+      operationId: getEmissionFactorsHistory
+      parameters:
+        - name: page
+          in: query
+          description: The page number starting from zero
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+        - name: size
+          in: query
+          description: The page size
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmissionFactorsHistoryResponseDTO'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1.0/installation/accounts:
     get:
       tags:
@@ -8694,6 +9005,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ReferenceDataDTO'
       security: []
   /v1.0/company-information/{registrationNumber}:
     get:
@@ -30740,6 +31058,73 @@ components:
       properties:
         reason:
           type: string
+    EmissionFactorsDetailDTO:
+      type: object
+      properties:
+        nationalInventory:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmissionFactorsNationalInventoryEntryDTO'
+        regionalNaturalGas:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmissionFactorsRegionalNaturalGasEntryDTO'
+    EmissionFactorsNationalInventoryEntryDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        sectorName:
+          type: string
+        ukGhgFuel:
+          type: string
+        fuel:
+          type: string
+        emissionFactor:
+          type: string
+          format: decimal
+        netCalorificValue:
+          type: string
+          format: decimal
+        oxidationFactor:
+          type: string
+          format: decimal
+        ncvMeasurementUnit:
+          type: string
+          enum:
+            - GJ_PER_TONNE
+            - GJ_PER_NM3
+        efMeasurementUnit:
+          type: string
+          enum:
+            - TONNES_OF_CO2_PER_TJ
+            - TONNES_OF_CO2_PER_NM3
+            - TONNES_OF_CO2_PER_TONNE
+    EmissionFactorsRegionalNaturalGasEntryDTO:
+      type: object
+      properties:
+        chargingZoneCode:
+          type: string
+        chargingZoneName:
+          type: string
+        emissionFactor:
+          type: string
+          format: decimal
+        netCalorificValue:
+          type: string
+          format: decimal
+        calculationFactor:
+          type: string
+          format: decimal
+    EmissionFactorsUploadDTO:
+      type: object
+      properties:
+        fileUuid:
+          type: string
+          format: uuid
+        data:
+          $ref: '#/components/schemas/EmissionFactorsDetailDTO'
     AccountUpdateSopIdDTO:
       type: object
       properties:
@@ -46016,6 +46401,41 @@ components:
           maxLength: 255
           minLength: 0
           type: string
+    EmissionFactorsHistoryEntryDTO:
+      type: object
+      properties:
+        referenceYear:
+          type: integer
+          format: int32
+        fileUuid:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        uploadedAt:
+          type: string
+          format: date
+    EmissionFactorsHistoryRecordDTO:
+      type: object
+      properties:
+        changedAt:
+          type: string
+          format: date-time
+        changedBy:
+          type: string
+        referenceYear:
+          type: integer
+          format: int32
+    EmissionFactorsHistoryResponseDTO:
+      type: object
+      properties:
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmissionFactorsHistoryRecordDTO'
+        totalItems:
+          type: integer
+          format: int64
     AccountSearchResults:
       type: object
       properties:

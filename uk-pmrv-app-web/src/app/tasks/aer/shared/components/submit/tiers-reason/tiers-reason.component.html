@@ -3,6 +3,7 @@
     (formSubmit)="onContinue()"
     [formGroup]="form"
     heading="Why could you not use the tiers applied in your monitoring plan?"
+    [caption]="'Calculation of emissions, ' + (sourceStream$ | async)"
     [hideSubmit]="(isEditable$ | async) === false">
     <div formControlName="type" govuk-radio legendSize="medium">
       <govuk-radio-option value="DATA_GAP" label="Due to a data gap">

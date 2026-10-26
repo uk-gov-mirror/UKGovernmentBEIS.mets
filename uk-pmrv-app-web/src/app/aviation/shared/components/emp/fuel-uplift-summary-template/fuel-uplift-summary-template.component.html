@@ -15,10 +15,11 @@
       <dd class="pre-wrap" govukSummaryListRowValue>
         {{ data.zeroFuelUplift }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a govukLink routerLink="../assignment-and-adjustment" [queryParams]="{ change: true }">Change</a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a govukLink routerLink="../assignment-and-adjustment" [queryParams]="{ change: true }">Change</a>
+        </dd>
+      }
     </div>
   </dl>
 </ng-container>
@@ -32,10 +33,11 @@
       <dd govukSummaryListRowValue>
         {{ data.fuelUpliftSupplierRecordType | fuelUpliftSupplierRecordType }}
       </dd>
-      <dd></dd>
-      <dd govukSummaryListRowActions *ngIf="isEditable">
-        <a govukLink routerLink="../fuel-uplift-records" [queryParams]="{ change: true }">Change</a>
-      </dd>
+      @if (isEditable) {
+        <dd govukSummaryListRowActions>
+          <a govukLink routerLink="../fuel-uplift-records" [queryParams]="{ change: true }">Change</a>
+        </dd>
+      }
     </div>
   </dl>
 </ng-container>

@@ -4,8 +4,7 @@
     [formGroup]="form"
     heading="Monitoring plan changes"
     submitText="Continue"
-    [hideSubmit]="(aerService.isEditable$ | async) === false"
-  >
+    [hideSubmit]="(aerService.isEditable$ | async) === false">
     <div *ngIf="monitoringPlanVersions$ | async as plans">
       <ng-container *ngIf="plans.length">
         <p class="govuk-body">
@@ -18,10 +17,15 @@
     </div>
     <app-boolean-radio-group
       controlName="existChangesNotCoveredInApprovedVariations"
-      legend="Were there any additional changes not covered in the approved monitoring plans?"
-    >
+      legend="Were there any additional changes not covered in the approved monitoring plans?">
       <div govukConditionalContent>
-        <div govuk-textarea label="Provide details" [maxLength]="10000" formControlName="details"></div>
+        <div
+          govuk-textarea
+          label="Describe the changes"
+          labelSize="small"
+          [maxLength]="10000"
+          formControlName="details"
+          [hint]="hint"></div>
       </div>
     </app-boolean-radio-group>
   </app-wizard-step>

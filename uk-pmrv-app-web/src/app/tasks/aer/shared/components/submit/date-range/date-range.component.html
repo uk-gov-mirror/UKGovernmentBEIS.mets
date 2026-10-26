@@ -2,9 +2,9 @@
   <app-wizard-step
     (formSubmit)="onContinue()"
     [formGroup]="form"
+    [caption]="'Calculation of emissions, ' + (sourceStream$ | async)"
     heading="What date range does this entry cover?"
-    [hideSubmit]="(isEditable$ | async) === false"
-  >
+    [hideSubmit]="(isEditable$ | async) === false">
     <div formControlName="fullYearCovered" govuk-radio legendSize="medium">
       <govuk-radio-option [value]="true" label="the whole year"></govuk-radio-option>
       <govuk-radio-option [value]="false" label="part of the year">
@@ -16,5 +16,5 @@
     </div>
   </app-wizard-step>
 
-  <a govukLink routerLink="../..">Return to: {{ taskKey | monitoringApproachEmissionDescription }} </a>
+  <a govukLink routerLink="../..">Return to: {{ taskKey | monitoringApproachEmissionDescription }}</a>
 </app-aer-task>

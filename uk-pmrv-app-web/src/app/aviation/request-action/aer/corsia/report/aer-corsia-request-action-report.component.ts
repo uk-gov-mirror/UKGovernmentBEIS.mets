@@ -48,7 +48,6 @@ import {
   AviationReportingService,
   LimitedCompanyOrganisation,
   RequestActionDTO,
-  RequestActionInfoDTO,
   RequestActionsService,
 } from 'pmrv-api';
 
@@ -145,7 +144,7 @@ export class AerCorsiaRequestActionReportComponent implements OnInit, AfterViewI
           }),
           this.requestActionsService
             .getRequestActionsByRequestId(requestAction.requestId)
-            .pipe(map((res) => this.sortTimeline(res.filter((timeline) => timeline.id <= requestAction.id)))),
+            .pipe(map((res) => res.filter((timeline) => timeline.id <= requestAction.id))),
         ]),
         of(null),
       ).pipe(
@@ -300,9 +299,5 @@ export class AerCorsiaRequestActionReportComponent implements OnInit, AfterViewI
         }, 500);
       },
     });
-  }
-
-  private sortTimeline(res: RequestActionInfoDTO[]): RequestActionInfoDTO[] {
-    return res.slice().sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
   }
 }

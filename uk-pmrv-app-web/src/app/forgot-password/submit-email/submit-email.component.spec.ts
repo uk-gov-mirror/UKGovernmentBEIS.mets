@@ -1,9 +1,10 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { SharedModule } from '@shared/shared.module';
 import { BasePage } from '@testing';
@@ -31,6 +32,10 @@ describe('SubmitEmailComponent', () => {
   }
 
   class Page extends BasePage<SubmitEmailComponent> {
+    get errorSummaryList(): string[] {
+      return this.queryAll<HTMLAnchorElement>('.govuk-error-summary__list a').map((a) => a.textContent.trim());
+    }
+
     get inputError(): string[] {
       return this.queryAll<HTMLSpanElement>('.govuk-error-message').reduce(
         (result, element) => [
@@ -81,5 +86,29 @@ describe('SubmitEmailComponent', () => {
 
     setValueAndSubmit('test@test.com');
     expect(getEmailSent());
+  });
+
+  it('should display an error when too many emails have been requested and allow to request again', () => {
+    const forgotPasswordService = TestBed.inject(ForgotPasswordService);
+    jest
+      .spyOn(forgotPasswordService, 'sendResetPasswordEmail')
+      .mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 429 })));
+    const button = element.querySelector<HTMLButtonElement>('button');
+    const getEmailSent = () => fixture.debugElement.query(By.directive(MockEmailSentComponent));
+
+    fixture.debugElement.query(By.css('input')).triggerEventHandler('input', { target: { value: 'test@test.com' } });
+    button.click();
+    fixture.detectChanges();
+
+    const tooManyRequestsError = 'You have requested too many password reset emails. Try again later';
+    expect(page.errorSummaryList).toEqual([tooManyRequestsError]);
+    expect(page.inputError).toEqual([`Error: ${tooManyRequestsError}`]);
+    expect(getEmailSent()).toBeNull();
+
+    button.click();
+    fixture.detectChanges();
+
+    expect(forgotPasswordService.sendResetPasswordEmail).toHaveBeenCalledTimes(2);
+    expect(getEmailSent()).not.toBeNull();
   });
 });

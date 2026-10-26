@@ -258,7 +258,7 @@ const routes: PermitRoute[] = [
       {
         path: '',
         data: {
-          pageTitle: 'Monitoring approaches - Perfluorocarbons (PFC) tier 2 emission factor',
+          pageTitle: 'Monitoring approaches - Perfluorocarbons (PFC) emission factor',
           backlink: '../efficiency',
         },
         component: Tier2EmissionFactorComponent,
@@ -268,8 +268,7 @@ const routes: PermitRoute[] = [
       {
         path: 'determination-installation',
         data: {
-          pageTitle:
-            'Monitoring approaches - Perfluorocarbons (PFC) tier 2 emission factor - Determination installation page',
+          pageTitle: 'Monitoring approaches - Perfluorocarbons (PFC) emission factor - Determination installation page',
           backlink: '../',
         },
         component: DeterminationInstallationComponent,
@@ -279,8 +278,7 @@ const routes: PermitRoute[] = [
       {
         path: 'schedule-measurements',
         data: {
-          pageTitle:
-            'Monitoring approaches - Perfluorocarbons (PFC) tier 2 emission factor - Schedule of measurements page',
+          pageTitle: 'Monitoring approaches - Perfluorocarbons (PFC) emission factor - Schedule of measurements page',
           backlink: '../determination-installation',
         },
         component: ScheduleMeasurementsComponent,
@@ -290,7 +288,7 @@ const routes: PermitRoute[] = [
       {
         path: 'answers',
         data: {
-          pageTitle: 'Monitoring approaches - Perfluorocarbons (PFC) tier 2 emission factor - Check your answers page',
+          pageTitle: 'Monitoring approaches - Perfluorocarbons (PFC) emission factor - Check your answers page',
         },
         component: Tier2EmissionFactorAnswersComponent,
         canActivate: [Tier2EmissionFactorAnswersGuard],
@@ -298,7 +296,7 @@ const routes: PermitRoute[] = [
       },
       {
         path: 'summary',
-        data: { pageTitle: 'Monitoring approaches - Perfluorocarbons (PFC) tier 2 emission factor - Summary page' },
+        data: { pageTitle: 'Monitoring approaches - Perfluorocarbons (PFC) emission factor - Summary page' },
         component: Tier2EmissionFactorSummaryComponent,
         canActivate: [SummaryGuard],
       },

@@ -17,6 +17,7 @@ describe('SkipLinkComponent', () => {
     imports: [SkipLinkComponent, HostComponent, RoutedComponent, RouterOutlet],
     template: `
       <govuk-skip-link />
+      <main id="main-content" tabindex="-1"></main>
       <router-outlet />
     `,
   })
@@ -52,5 +53,15 @@ describe('SkipLinkComponent', () => {
 
     const hostElement: HTMLElement = fixture.nativeElement;
     expect(hostElement.querySelector<HTMLAnchorElement>('a').getAttribute('href').split('#')[0]).toEqual('/test');
+  });
+
+  it('should move focus to the anchor target when clicked', () => {
+    const hostElement: HTMLElement = fixture.nativeElement;
+    const link = hostElement.querySelector<HTMLAnchorElement>('a');
+    const mainContent = hostElement.querySelector<HTMLElement>('#main-content');
+
+    link.click();
+
+    expect(document.activeElement).toEqual(mainContent);
   });
 });

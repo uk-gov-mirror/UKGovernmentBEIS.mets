@@ -4,9 +4,10 @@
     <dd govukSummaryListRowValue>
       {{ data.confidential ? 'Yes' : 'No' }}
     </dd>
-    <dd></dd>
-    <dd govukSummaryListRowActions *ngIf="isEditable">
-      <a govukLink routerLink="../" [queryParams]="changeUrlQueryParams" class="change-link">Change</a>
-    </dd>
+    @if (isEditable) {
+      <dd govukSummaryListRowActions>
+        <a govukLink routerLink="../" [queryParams]="changeUrlQueryParams" class="change-link">Change</a>
+      </dd>
+    }
   </div>
 </dl>

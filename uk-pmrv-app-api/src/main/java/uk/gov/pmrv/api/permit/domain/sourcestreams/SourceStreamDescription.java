@@ -91,5 +91,5 @@ public enum SourceStreamDescription {
     WOOD_WOOD_WASTE("Wood/Wood Waste"),
     VENTED_GAS("Vented Gas");
 
-    private String description;
+    private final String description;
 }

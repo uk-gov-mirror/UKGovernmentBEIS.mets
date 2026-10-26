@@ -23,6 +23,14 @@ export class WorkflowStatusPipe implements PipeTransform {
         return 'Withdrawn';
       case 'CLOSED':
         return 'Closed';
+      case 'DEEMED_WITHDRAWN':
+        return 'Deemed withdrawn';
+      case 'EXEMPT':
+        return 'Exempt';
+      case 'MIGRATED':
+        return 'Migrated';
+      case 'NOT_REQUIRED':
+        return 'Not required';
       default:
         return null;
     }

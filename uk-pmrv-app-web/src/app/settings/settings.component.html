@@ -12,7 +12,9 @@
     <div class="govuk-grid-column-full">
       <ul class="app-settings-list">
         @if (vm.showEmissionFactors) {
-          <li class="app-settings-list__item"><a class="govuk-body" govukLink href="#">Emission factors</a></li>
+          <li class="app-settings-list__item">
+            <a class="govuk-body" govukLink routerLink="emission-factors">Emission factors</a>
+          </li>
         }
         @if (vm.showFees) {
           <li class="app-settings-list__item"><a class="govuk-body" govukLink routerLink="fees">Fees</a></li>

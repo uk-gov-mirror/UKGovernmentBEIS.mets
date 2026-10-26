@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog logicalFilePath="v0.2.0/changelog_settings_emission_factors.xml"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="0_2_0_settings_emission_factors_history_seq" author="vasileios.vitzilaios@keyes.eu">
+        <createSequence sequenceName="settings_emission_factors_history_seq"
+                        startValue="1"
+                        incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="0_2_0_settings_emission_factors_history" author="vasileios.vitzilaios@keyes.eu">
+        <createTable tableName="settings_emission_factors_history">
+            <column name="id" type="bigint" remarks="The emission factors history entry identifier">
+                <constraints primaryKey="true" primaryKeyName="settings_emission_factors_history_id_pk"/>
+            </column>
+            <column name="reference_year" type="integer" remarks="The reference year for the emission factors file">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_uuid" type="uuid" remarks="The UUID of the uploaded emission factors file">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="varchar(255)" remarks="The file name of the uploaded emission factors file">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_at" type="timestamp" remarks="The timestamp when the file was uploaded">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_by" type="varchar(255)" remarks="The user ID of the uploader">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="0_2_0_settings_emission_factors_history_data" author="vasileios.vitzilaios@keyes.eu">
+        <addColumn tableName="settings_emission_factors_history">
+            <column name="data" type="jsonb" remarks="Snapshot of the national inventory and regional natural gas data submitted with the file"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="0_2_0_settings_emission_factors_history_status" author="vasileios.vitzilaios@keyes.eu">
+        <addColumn tableName="settings_emission_factors_history">
+            <column name="status" type="varchar(255)" defaultValue="COMPLETED"
+                    remarks="PENDING while the uploaded data awaits confirmation, COMPLETED once submitted">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <dropDefaultValue tableName="settings_emission_factors_history" columnName="status"/>
+    </changeSet>
+
+    <changeSet id="0_2_0_settings_emission_factors_history_user_id" author="vasileios.vitzilaios@keyes.eu">
+        <renameColumn tableName="settings_emission_factors_history" oldColumnName="uploaded_by" newColumnName="user_id"
+                      columnDataType="varchar(255)" remarks="The user ID of the regulator who uploaded the file"/>
+        <addColumn tableName="settings_emission_factors_history">
+            <column name="uploaded_by" type="varchar(512)" remarks="The full name of the regulator who uploaded the file">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

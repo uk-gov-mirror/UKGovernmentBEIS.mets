@@ -20,8 +20,7 @@ describe('ServiceBannerComponent', () => {
           aviation: true,
         },
         analytics: {
-          measurementId: '',
-          propertyId: '',
+          gtmContainerId: '',
         },
         notificationAlerts: [
           {

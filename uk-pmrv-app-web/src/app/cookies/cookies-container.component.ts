@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
-import { toggleAnalytics } from '@core/analytics';
+import { AnalyticsService } from '@core/services/analytics.service';
 
 import { CookiesService } from './cookies.service';
 
@@ -18,13 +18,14 @@ import { CookiesService } from './cookies.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CookiesContainerComponent {
-  constructor(private cookiesService: CookiesService) {}
+  private readonly cookiesService = inject(CookiesService);
+  private readonly analyticsService = inject(AnalyticsService);
   cookiesEnabled = this.cookiesService.cookiesEnabled();
   cookiesAccepted$ = this.cookiesService.accepted$;
 
   acceptCookies(expired: string) {
     this.cookiesService.acceptAllCookies(+expired);
-    toggleAnalytics(true);
+    this.analyticsService.enableGoogleTagManager();
   }
 
   rejectCookies(expired: string) {

@@ -12,7 +12,7 @@
 
 export interface InlineObject7 {
   /**
-   * The note file
+   * The document template source file
    */
   file: Blob;
 }

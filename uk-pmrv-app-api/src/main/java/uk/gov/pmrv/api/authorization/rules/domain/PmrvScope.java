@@ -9,4 +9,5 @@ public class PmrvScope {
     public static final String ALR_BULK_DOWNLOAD = "ALR_BULK_DOWNLOAD";
     public static final String BDRS2_BULK_DOWNLOAD = "BDRS2_BULK_DOWNLOAD";
     public static final String SETTINGS_PAGE_FEES_VIEW = "SETTINGS_PAGE_FEES_VIEW";
+    public static final String SETTINGS_PAGE_EMISSION_FACTORS_VIEW = "SETTINGS_PAGE_EMISSION_FACTORS_VIEW";
 }

@@ -44,6 +44,7 @@ export class TextInputComponent extends FormInput implements ControlValueAccesso
   readonly labelSize = input<LabelSizeType>('normal');
   readonly isLabelHidden = input(false);
   readonly hint = input<string>();
+  readonly describedBy = input<string>();
   readonly widthClass = input<GovukWidthClass>('govuk-!-width-full');
   readonly inputType = input<HTMLInputType>('text');
   readonly autoComplete = input('on');
@@ -73,6 +74,13 @@ export class TextInputComponent extends FormInput implements ControlValueAccesso
   disabled: boolean;
   onChange: (_: any) => any;
   onBlur: (_: any) => any;
+
+  get ariaDescribedBy(): string | null {
+    const ids = [this.hint() ? `${this.identifier}-hint` : null, this.describedBy() ?? null].filter(
+      (id) => id !== null,
+    );
+    return ids.length ? ids.join(' ') : null;
+  }
 
   constructor() {
     super();

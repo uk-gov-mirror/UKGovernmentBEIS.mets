@@ -16,9 +16,14 @@ import { Observable } from 'rxjs';
 
 import { Configuration } from '../configuration';
 import { CustomHttpParameterCodec } from '../encoder';
+import { EmissionFactorsDetailDTO } from '../model/emissionFactorsDetailDTO';
+import { EmissionFactorsHistoryEntryDTO } from '../model/emissionFactorsHistoryEntryDTO';
+import { EmissionFactorsHistoryResponseDTO } from '../model/emissionFactorsHistoryResponseDTO';
+import { EmissionFactorsUploadDTO } from '../model/emissionFactorsUploadDTO';
 import { FeeHistoryResponseDTO } from '../model/feeHistoryResponseDTO';
 import { FeeRowDTO } from '../model/feeRowDTO';
 import { FeeUpdateDTO } from '../model/feeUpdateDTO';
+import { FileToken } from '../model/fileToken';
 import { BASE_PATH } from '../variables';
 
 @Injectable({
@@ -45,6 +50,20 @@ export class SettingsService {
       this.configuration.basePath = basePath;
     }
     this.encoder = this.configuration.encoder || new CustomHttpParameterCodec();
+  }
+
+  /**
+   * @param consumes string[] mime-types
+   * @return true: consumes contains 'multipart/form-data', false: otherwise
+   */
+  private canConsumeForm(consumes: string[]): boolean {
+    const form = 'multipart/form-data';
+    for (const consume of consumes) {
+      if (form === consume) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private addToHttpParams(httpParams: HttpParams, value: any, key?: string): HttpParams {
@@ -174,6 +193,78 @@ export class SettingsService {
   }
 
   /**
+   * Generates a token to download the emission factors file for the given reference year
+   * @param referenceYear The reference year
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public generateGetEmissionFactorsFileToken(referenceYear: number): Observable<FileToken>;
+  public generateGetEmissionFactorsFileToken(
+    referenceYear: number,
+    observe: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpResponse<FileToken>>;
+  public generateGetEmissionFactorsFileToken(
+    referenceYear: number,
+    observe: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpEvent<FileToken>>;
+  public generateGetEmissionFactorsFileToken(
+    referenceYear: number,
+    observe: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<FileToken>;
+  public generateGetEmissionFactorsFileToken(
+    referenceYear: number,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<any> {
+    if (referenceYear === null || referenceYear === undefined) {
+      throw new Error(
+        'Required parameter referenceYear was null or undefined when calling generateGetEmissionFactorsFileToken.',
+      );
+    }
+
+    let headers = this.defaultHeaders;
+
+    // authentication (bearerAuth) required
+    const credential = this.configuration.lookupCredential('bearerAuth');
+    if (credential) {
+      headers = headers.set('Authorization', 'Bearer ' + credential);
+    }
+
+    let httpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept;
+    if (httpHeaderAcceptSelected === undefined) {
+      // to determine the Accept header
+      const httpHeaderAccepts: string[] = ['application/json'];
+      httpHeaderAcceptSelected = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    }
+    if (httpHeaderAcceptSelected !== undefined) {
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    let responseType_: 'text' | 'json' = 'json';
+    if (httpHeaderAcceptSelected && httpHeaderAcceptSelected.startsWith('text')) {
+      responseType_ = 'text';
+    }
+
+    return this.httpClient.get<FileToken>(
+      `${this.configuration.basePath}/v1.0/installation/settings/emission-factors/${encodeURIComponent(String(referenceYear))}/file`,
+      {
+        responseType: <any>responseType_,
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress,
+      },
+    );
+  }
+
+  /**
    * Retrieves the settings sections accessible to the current regulator user
    * @param accountType The account type
    * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
@@ -234,6 +325,224 @@ export class SettingsService {
     return this.httpClient.get<Array<string>>(
       `${this.configuration.basePath}/v1.0/${encodeURIComponent(String(accountType))}/settings`,
       {
+        responseType: <any>responseType_,
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress,
+      },
+    );
+  }
+
+  /**
+   * Retrieves the list of emission factors entries sorted by reference year descending
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public getEmissionFactors(): Observable<Array<EmissionFactorsHistoryEntryDTO>>;
+  public getEmissionFactors(
+    observe: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpResponse<Array<EmissionFactorsHistoryEntryDTO>>>;
+  public getEmissionFactors(
+    observe: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpEvent<Array<EmissionFactorsHistoryEntryDTO>>>;
+  public getEmissionFactors(
+    observe: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<Array<EmissionFactorsHistoryEntryDTO>>;
+  public getEmissionFactors(
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<any> {
+    let headers = this.defaultHeaders;
+
+    // authentication (bearerAuth) required
+    const credential = this.configuration.lookupCredential('bearerAuth');
+    if (credential) {
+      headers = headers.set('Authorization', 'Bearer ' + credential);
+    }
+
+    let httpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept;
+    if (httpHeaderAcceptSelected === undefined) {
+      // to determine the Accept header
+      const httpHeaderAccepts: string[] = ['application/json'];
+      httpHeaderAcceptSelected = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    }
+    if (httpHeaderAcceptSelected !== undefined) {
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    let responseType_: 'text' | 'json' = 'json';
+    if (httpHeaderAcceptSelected && httpHeaderAcceptSelected.startsWith('text')) {
+      responseType_ = 'text';
+    }
+
+    return this.httpClient.get<Array<EmissionFactorsHistoryEntryDTO>>(
+      `${this.configuration.basePath}/v1.0/installation/settings/emission-factors`,
+      {
+        responseType: <any>responseType_,
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress,
+      },
+    );
+  }
+
+  /**
+   * Retrieves the emission factors detail data for the given reference year
+   * @param referenceYear The reference year
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public getEmissionFactorsDetail(referenceYear: number): Observable<EmissionFactorsDetailDTO>;
+  public getEmissionFactorsDetail(
+    referenceYear: number,
+    observe: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpResponse<EmissionFactorsDetailDTO>>;
+  public getEmissionFactorsDetail(
+    referenceYear: number,
+    observe: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpEvent<EmissionFactorsDetailDTO>>;
+  public getEmissionFactorsDetail(
+    referenceYear: number,
+    observe: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<EmissionFactorsDetailDTO>;
+  public getEmissionFactorsDetail(
+    referenceYear: number,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<any> {
+    if (referenceYear === null || referenceYear === undefined) {
+      throw new Error('Required parameter referenceYear was null or undefined when calling getEmissionFactorsDetail.');
+    }
+
+    let headers = this.defaultHeaders;
+
+    // authentication (bearerAuth) required
+    const credential = this.configuration.lookupCredential('bearerAuth');
+    if (credential) {
+      headers = headers.set('Authorization', 'Bearer ' + credential);
+    }
+
+    let httpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept;
+    if (httpHeaderAcceptSelected === undefined) {
+      // to determine the Accept header
+      const httpHeaderAccepts: string[] = ['application/json'];
+      httpHeaderAcceptSelected = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    }
+    if (httpHeaderAcceptSelected !== undefined) {
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    let responseType_: 'text' | 'json' = 'json';
+    if (httpHeaderAcceptSelected && httpHeaderAcceptSelected.startsWith('text')) {
+      responseType_ = 'text';
+    }
+
+    return this.httpClient.get<EmissionFactorsDetailDTO>(
+      `${this.configuration.basePath}/v1.0/installation/settings/emission-factors/${encodeURIComponent(String(referenceYear))}`,
+      {
+        responseType: <any>responseType_,
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress,
+      },
+    );
+  }
+
+  /**
+   * Retrieves the paginated history of submitted emission factors updates, newest first
+   * @param page The page number starting from zero
+   * @param size The page size
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public getEmissionFactorsHistory(page: number, size: number): Observable<EmissionFactorsHistoryResponseDTO>;
+  public getEmissionFactorsHistory(
+    page: number,
+    size: number,
+    observe: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpResponse<EmissionFactorsHistoryResponseDTO>>;
+  public getEmissionFactorsHistory(
+    page: number,
+    size: number,
+    observe: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpEvent<EmissionFactorsHistoryResponseDTO>>;
+  public getEmissionFactorsHistory(
+    page: number,
+    size: number,
+    observe: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<EmissionFactorsHistoryResponseDTO>;
+  public getEmissionFactorsHistory(
+    page: number,
+    size: number,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<any> {
+    if (page === null || page === undefined) {
+      throw new Error('Required parameter page was null or undefined when calling getEmissionFactorsHistory.');
+    }
+    if (size === null || size === undefined) {
+      throw new Error('Required parameter size was null or undefined when calling getEmissionFactorsHistory.');
+    }
+
+    let queryParameters = new HttpParams({ encoder: this.encoder });
+    if (page !== undefined && page !== null) {
+      queryParameters = this.addToHttpParams(queryParameters, <any>page, 'page');
+    }
+    if (size !== undefined && size !== null) {
+      queryParameters = this.addToHttpParams(queryParameters, <any>size, 'size');
+    }
+
+    let headers = this.defaultHeaders;
+
+    // authentication (bearerAuth) required
+    const credential = this.configuration.lookupCredential('bearerAuth');
+    if (credential) {
+      headers = headers.set('Authorization', 'Bearer ' + credential);
+    }
+
+    let httpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept;
+    if (httpHeaderAcceptSelected === undefined) {
+      // to determine the Accept header
+      const httpHeaderAccepts: string[] = ['application/json'];
+      httpHeaderAcceptSelected = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    }
+    if (httpHeaderAcceptSelected !== undefined) {
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    let responseType_: 'text' | 'json' = 'json';
+    if (httpHeaderAcceptSelected && httpHeaderAcceptSelected.startsWith('text')) {
+      responseType_ = 'text';
+    }
+
+    return this.httpClient.get<EmissionFactorsHistoryResponseDTO>(
+      `${this.configuration.basePath}/v1.0/installation/settings/emission-factors/history`,
+      {
+        params: queryParameters,
         responseType: <any>responseType_,
         withCredentials: this.configuration.withCredentials,
         headers: headers,
@@ -413,6 +722,77 @@ export class SettingsService {
   }
 
   /**
+   * Submits the data of a pending upload, making it the emission factors of its reference year
+   * @param fileUuid The file uuid returned by the upload
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public submitEmissionFactors(fileUuid: string): Observable<any>;
+  public submitEmissionFactors(
+    fileUuid: string,
+    observe: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpResponse<any>>;
+  public submitEmissionFactors(
+    fileUuid: string,
+    observe: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpEvent<any>>;
+  public submitEmissionFactors(
+    fileUuid: string,
+    observe: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<any>;
+  public submitEmissionFactors(
+    fileUuid: string,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<any> {
+    if (fileUuid === null || fileUuid === undefined) {
+      throw new Error('Required parameter fileUuid was null or undefined when calling submitEmissionFactors.');
+    }
+
+    let headers = this.defaultHeaders;
+
+    // authentication (bearerAuth) required
+    const credential = this.configuration.lookupCredential('bearerAuth');
+    if (credential) {
+      headers = headers.set('Authorization', 'Bearer ' + credential);
+    }
+
+    let httpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept;
+    if (httpHeaderAcceptSelected === undefined) {
+      // to determine the Accept header
+      const httpHeaderAccepts: string[] = ['application/json'];
+      httpHeaderAcceptSelected = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    }
+    if (httpHeaderAcceptSelected !== undefined) {
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    let responseType_: 'text' | 'json' = 'json';
+    if (httpHeaderAcceptSelected && httpHeaderAcceptSelected.startsWith('text')) {
+      responseType_ = 'text';
+    }
+
+    return this.httpClient.post<any>(
+      `${this.configuration.basePath}/v1.0/installation/settings/emission-factors/uploads/${encodeURIComponent(String(fileUuid))}/submit`,
+      null,
+      {
+        responseType: <any>responseType_,
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress,
+      },
+    );
+  }
+
+  /**
    * Updates the fee amount for a given fee method and fee type
    * @param accountType The account type
    * @param id The fee method id
@@ -510,6 +890,109 @@ export class SettingsService {
       `${this.configuration.basePath}/v1.0/${encodeURIComponent(String(accountType))}/settings/fees/${encodeURIComponent(String(id))}/${encodeURIComponent(String(feeType))}`,
       feeUpdateDTO,
       {
+        responseType: <any>responseType_,
+        withCredentials: this.configuration.withCredentials,
+        headers: headers,
+        observe: observe,
+        reportProgress: reportProgress,
+      },
+    );
+  }
+
+  /**
+   * Validates and parses an emission factors xlsx file for the given reference year and keeps it as a pending upload until it is submitted
+   * @param referenceYear The reference year
+   * @param file The emission factors xlsx file
+   * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+   * @param reportProgress flag to report request and response progress.
+   */
+  public uploadEmissionFactors(referenceYear: number, file?: Blob): Observable<EmissionFactorsUploadDTO>;
+  public uploadEmissionFactors(
+    referenceYear: number,
+    file: Blob,
+    observe: 'response',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpResponse<EmissionFactorsUploadDTO>>;
+  public uploadEmissionFactors(
+    referenceYear: number,
+    file: Blob,
+    observe: 'events',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<HttpEvent<EmissionFactorsUploadDTO>>;
+  public uploadEmissionFactors(
+    referenceYear: number,
+    file: Blob,
+    observe: 'body',
+    reportProgress?: boolean,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<EmissionFactorsUploadDTO>;
+  public uploadEmissionFactors(
+    referenceYear: number,
+    file?: Blob,
+    observe: any = 'body',
+    reportProgress: boolean = false,
+    options?: { httpHeaderAccept?: 'application/json' },
+  ): Observable<any> {
+    if (referenceYear === null || referenceYear === undefined) {
+      throw new Error('Required parameter referenceYear was null or undefined when calling uploadEmissionFactors.');
+    }
+
+    let queryParameters = new HttpParams({ encoder: this.encoder });
+    if (referenceYear !== undefined && referenceYear !== null) {
+      queryParameters = this.addToHttpParams(queryParameters, <any>referenceYear, 'referenceYear');
+    }
+
+    let headers = this.defaultHeaders;
+
+    // authentication (bearerAuth) required
+    const credential = this.configuration.lookupCredential('bearerAuth');
+    if (credential) {
+      headers = headers.set('Authorization', 'Bearer ' + credential);
+    }
+
+    let httpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept;
+    if (httpHeaderAcceptSelected === undefined) {
+      // to determine the Accept header
+      const httpHeaderAccepts: string[] = ['application/json'];
+      httpHeaderAcceptSelected = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+    }
+    if (httpHeaderAcceptSelected !== undefined) {
+      headers = headers.set('Accept', httpHeaderAcceptSelected);
+    }
+
+    // to determine the Content-Type header
+    const consumes: string[] = ['multipart/form-data'];
+
+    const canConsumeForm = this.canConsumeForm(consumes);
+
+    let formParams: { append(param: string, value: any): any };
+    let useForm = false;
+    const convertFormParamsToString = false;
+    // use FormData to transmit files using content-type "multipart/form-data"
+    // see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
+    useForm = canConsumeForm;
+    if (useForm) {
+      formParams = new FormData();
+    } else {
+      formParams = new HttpParams({ encoder: this.encoder });
+    }
+
+    if (file !== undefined) {
+      formParams = (formParams.append('file', <any>file) as any) || formParams;
+    }
+
+    let responseType_: 'text' | 'json' = 'json';
+    if (httpHeaderAcceptSelected && httpHeaderAcceptSelected.startsWith('text')) {
+      responseType_ = 'text';
+    }
+
+    return this.httpClient.post<EmissionFactorsUploadDTO>(
+      `${this.configuration.basePath}/v1.0/installation/settings/emission-factors`,
+      convertFormParamsToString ? formParams.toString() : formParams,
+      {
+        params: queryParameters,
         responseType: <any>responseType_,
         withCredentials: this.configuration.withCredentials,
         headers: headers,

@@ -17,8 +17,7 @@ export type FeaturesConfig = { [key in FeatureName]?: boolean };
 export interface ConfigState {
   features?: FeaturesConfig;
   analytics?: {
-    measurementId: string;
-    propertyId: string;
+    gtmContainerId: string;
   };
   keycloakServerUrl?: string;
 }
@@ -26,7 +25,6 @@ export interface ConfigState {
 export const initialState: ConfigState = {
   features: {},
   analytics: {
-    measurementId: '',
-    propertyId: '',
+    gtmContainerId: '',
   },
 };

@@ -123,8 +123,8 @@ describe('EmissionSourcesComponent', () => {
     it('should display the emission sources', () => {
       expect(page.emissionSourcesTextContents).toEqual([
         [],
-        ['S1', 'Boiler', 'Change', 'Delete'],
-        ['S2', 'Boiler 2', 'Change', 'Delete'],
+        ['S1', 'Boiler', 'ChangeDelete'],
+        ['S2', 'Boiler 2', 'ChangeDelete'],
       ]);
     });
 

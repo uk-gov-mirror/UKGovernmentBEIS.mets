@@ -168,6 +168,8 @@ export class ItemActionTypePipe implements PipeTransform {
       case 'AER_VERIFICATION_RETURNED_TO_OPERATOR':
         return 'Verifier returned to operator for changes';
 
+      case 'DRE_APPLICATION_SUBMITTED':
+        return 'Reportable emissions updated';
       case 'DRE_APPLICATION_CANCELLED':
         return 'Reportable emissions cancelled';
       case 'DRE_APPLICATION_PEER_REVIEW_REQUESTED':
@@ -684,6 +686,14 @@ export class ItemActionTypePipe implements PipeTransform {
         return 'Withdrawn';
       case 'NER_APPLICATION_COMPLETED':
         return 'Completed';
+      case 'NER_APPLICATION_PROCEEDED_TO_AUTHORITY':
+        return 'New entrant reserve application proceeded to authority';
+      case 'NER_APPLICATION_ACCEPTED':
+        return 'New entrant reserve application accepted';
+      case 'NER_APPLICATION_ACCEPTED_WITH_CORRECTIONS':
+        return 'New entrant reserve application accepted with corrections';
+      case 'NER_APPLICATION_REJECTED':
+        return 'New entrant reserve application rejected';
       case 'NER_APPLICATION_RE_INITIATED':
         return 'Reopened';
 

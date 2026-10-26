@@ -30,12 +30,19 @@ describe('MultipleFileInputComponent', () => {
     standalone: false,
     template: `
       <form [formGroup]="form">
-        <app-multiple-file-input formControlName="file" [baseDownloadUrl]="getDownloadUrl()"></app-multiple-file-input>
+        <app-multiple-file-input
+          formControlName="file"
+          [baseDownloadUrl]="getDownloadUrl()"
+          [label]="label"
+          [headingLevel]="headingLevel"
+          listTitle="Files added"></app-multiple-file-input>
       </form>
     `,
   })
   class TestComponent {
     form = new FormGroup({ file: new FormControl(null) });
+    label = 'Upload a file';
+    headingLevel = 2;
     getDownloadUrl() {
       return `/download/`;
     }
@@ -60,6 +67,10 @@ describe('MultipleFileInputComponent', () => {
 
     get input() {
       return this.query<HTMLInputElement>('input');
+    }
+
+    get trigger() {
+      return this.query<HTMLLabelElement>('label[role="link"]');
     }
   }
 
@@ -178,5 +189,87 @@ describe('MultipleFileInputComponent', () => {
     expect(page.input.disabled).toBeTruthy();
     expect(page.query('label.govuk-button--disabled')).toBeTruthy();
     expect(page.deleteButtons.every((button) => button.disabled)).toBeTruthy();
+    expect(page.trigger.hasAttribute('tabindex')).toBeFalsy();
+    expect(page.trigger.getAttribute('aria-disabled')).toEqual('true');
+  });
+
+  describe('speech recognition support', () => {
+    it('should expose the visible label as a focusable link that targets the hidden input', () => {
+      expect(page.trigger.getAttribute('for')).toEqual(page.input.id);
+      expect(page.trigger.getAttribute('tabindex')).toEqual('0');
+      expect(page.trigger.getAttribute('aria-labelledby')).toEqual(`l.${page.input.id} ld.${page.input.id}`);
+      expect(page.trigger.getAttribute('aria-describedby')).toEqual(`${page.input.id}-hints`);
+      expect(page.trigger.textContent.trim()).toEqual('Choose files');
+      expect(page.input.getAttribute('tabindex')).toEqual('-1');
+    });
+
+    it.each(['Enter', ' '])('should open the file picker on "%s" key', (key) => {
+      const clickSpy = jest.spyOn(page.input, 'click').mockImplementation();
+      const event = new KeyboardEvent('keydown', { key, cancelable: true });
+
+      page.trigger.dispatchEvent(event);
+
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      expect(event.defaultPrevented).toBeTruthy();
+    });
+
+    it('should not open the file picker when disabled', () => {
+      control.disable();
+      fixture.detectChanges();
+      const clickSpy = jest.spyOn(page.input, 'click').mockImplementation();
+
+      page.trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+
+      expect(clickSpy).not.toHaveBeenCalled();
+    });
+
+    it('should move focus from the hidden input to the trigger', () => {
+      page.input.focus();
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(page.trigger);
+      expect(page.trigger.classList).toContain('moj-multi-file-upload--focused');
+    });
+
+    it('should keep focus on the trigger after selecting files', () => {
+      page.files = [new File(['test content'], 'New file')];
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(page.trigger);
+    });
+
+    it('should mark the control as touched when the trigger loses focus', () => {
+      page.trigger.focus();
+      page.trigger.blur();
+
+      expect(control.touched).toBeTruthy();
+    });
+  });
+
+  it('should render the label as an h2 heading referenced by the input by default', () => {
+    control.setValue([{ file: new File(['abc'], 'Uploaded file'), uuid: '1234' }]);
+    fixture.detectChanges();
+
+    const heading = page.query<HTMLHeadingElement>(`[id="l.${page.input.id}"]`);
+    expect(heading.tagName).toEqual('H2');
+    expect(heading.textContent.trim()).toEqual('Upload a file');
+    expect(page.input.getAttribute('aria-labelledby')).toContain(`l.${page.input.id}`);
+    expect(page.queryAll('h2').map((el) => el.textContent.trim())).toEqual(['Files added', 'Upload a file']);
+  });
+
+  it('should render headings at the given heading level', () => {
+    hostComponent.headingLevel = 4;
+    control.setValue([{ file: new File(['abc'], 'Uploaded file'), uuid: '1234' }]);
+    fixture.detectChanges();
+
+    expect(page.queryAll('h2')).toHaveLength(0);
+    expect(page.queryAll('h4').map((el) => el.textContent.trim())).toEqual(['Files added', 'Upload a file']);
+  });
+
+  it('should not render an empty heading when there is no label', () => {
+    hostComponent.label = null;
+    fixture.detectChanges();
+
+    expect(page.query(`[id="l.${page.input.id}"]`)).toBeNull();
   });
 });

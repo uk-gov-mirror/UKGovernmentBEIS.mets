@@ -8,6 +8,7 @@ import { PendingRequestService } from '@core/guards/pending-request.service';
 import { DestroySubject } from '@core/services/destroy-subject.service';
 import { BusinessErrorService } from '@error/business-error/business-error.service';
 import { catchBadRequest, ErrorCodes } from '@error/business-errors';
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
 
 import { GovukValidators } from 'govuk-components';
 
@@ -63,6 +64,16 @@ export class TiersUsedComponent {
     shareReplay({ bufferSize: 1, refCount: true }),
   );
 
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
+    }),
+  );
+
   permitParamMonitoringTiers$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
     map(([payload, sourceStreamEmission]) => {
       const sourceStreamEmissionId = sourceStreamEmission?.id;
@@ -111,6 +122,7 @@ export class TiersUsedComponent {
     readonly aerService: AerService,
     private readonly router: Router,
     readonly route: ActivatedRoute,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     readonly pendingRequest: PendingRequestService,
     private readonly destroy$: DestroySubject,
     private readonly businessErrorService: BusinessErrorService,

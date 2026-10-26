@@ -12,6 +12,7 @@ import { AerService } from '../../core/aer.service';
   standalone: false,
   template: `
     <app-page-heading>{{ taskKey | monitoringApproachEmissionDescription }}</app-page-heading>
+    <app-include-calc-measurement-info [isMeasurement]="true"></app-include-calc-measurement-info>
     <app-measurement-group [data]="aerData$ | async" [taskKey]="taskKey"></app-measurement-group>
     <app-return-link></app-return-link>
   `,

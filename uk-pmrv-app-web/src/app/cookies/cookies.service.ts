@@ -107,4 +107,17 @@ export class CookiesService {
     });
     document.cookie = updatedCookie;
   }
+
+  hasAnalyticsConsent(): boolean {
+    const cookieStr = this.getCookie(this.COOKIES_POLICY);
+    if (!cookieStr) {
+      return false;
+    }
+
+    try {
+      return JSON.parse(decodeURIComponent(cookieStr))?.usage === true;
+    } catch {
+      return false;
+    }
+  }
 }

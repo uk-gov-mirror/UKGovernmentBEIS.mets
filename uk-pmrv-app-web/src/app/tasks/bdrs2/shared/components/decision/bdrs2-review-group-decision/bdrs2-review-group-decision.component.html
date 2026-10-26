@@ -58,6 +58,7 @@
                 [baseDownloadUrl]="getDownloadUrl()"
                 [label]="(uploadedFiles[i] | async) === true ? 'Upload a different file' : 'Upload a file (optional)'"
                 headerSize="s"
+                headingLevel="4"
                 listTitle="Uploaded attachments for the operator"
                 formControlName="files"></app-multiple-file-input>
             </fieldset>
@@ -98,7 +99,7 @@
       ) {
         <div govukSummaryListRow>
           <dt govukSummaryListRowKey>Does the operator need to send the amendments to the verifier?</dt>
-          <dd govukSummaryListRowValue>{{ decisionData.details?.['verificationRequired'] ? 'Yes' : 'No' }}</dd>
+          <dd govukSummaryListRowValue>{{ $any(decisionData).details?.verificationRequired ? 'Yes' : 'No' }}</dd>
         </div>
       }
 

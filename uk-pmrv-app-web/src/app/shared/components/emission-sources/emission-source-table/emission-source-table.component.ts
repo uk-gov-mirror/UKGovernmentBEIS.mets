@@ -21,7 +21,6 @@ export class EmissionSourceTableComponent {
   columns: GovukTableColumn[] = [
     { field: 'reference', header: 'Reference' },
     { field: 'description', header: 'Description' },
-    { field: 'change', header: '', widthClass: 'app-column-width-5-per' },
-    { field: 'delete', header: '', widthClass: 'app-column-width-5-per' },
+    { field: 'actions', header: 'Actions', hiddenHeader: true, widthClass: 'app-column-width-5-per' },
   ];
 }

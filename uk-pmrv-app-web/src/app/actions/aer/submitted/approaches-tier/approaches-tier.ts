@@ -7,7 +7,7 @@ export function getCalculationHeading(payload, index, taskKey) {
     (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
   );
 
-  return `${aerSourceStream.reference} ${sourceStreamDescriptionPipe.transform(aerSourceStream.description)}`;
+  return `${aerSourceStream.reference} ${sourceStreamDescriptionPipe.transform(aerSourceStream)}`;
 }
 
 export function getMeasurementHeading(payload, index, taskKey) {

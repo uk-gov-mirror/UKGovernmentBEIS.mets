@@ -3,6 +3,7 @@
     (formSubmit)="onContinue()"
     [formGroup]="form"
     heading="Review the calculated emissions"
+    [caption]="'Calculation of emissions, ' + (sourceStream$ | async)"
     [hideSubmit]="(isEditable$ | async) === false">
     <ng-container *ngFor="let element of emissionsElements$ | async">
       <h2 class="govuk-heading-m">{{ element.label }}</h2>

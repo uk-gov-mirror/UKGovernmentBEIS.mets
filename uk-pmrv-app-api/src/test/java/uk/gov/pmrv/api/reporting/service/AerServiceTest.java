@@ -2,12 +2,12 @@ package uk.gov.pmrv.api.reporting.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
+import uk.gov.netz.api.common.exception.BusinessException;
+import uk.gov.pmrv.api.common.exception.MetsErrorCode;
 import uk.gov.pmrv.api.reporting.domain.Aer;
 import uk.gov.pmrv.api.reporting.domain.AerContainer;
 import uk.gov.pmrv.api.reporting.domain.AerEntity;
@@ -27,9 +27,11 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -108,6 +110,20 @@ class AerServiceTest {
                 .validate(aerContainer, accountId);
         verify(reportableEmissionsService, times(1))
                 .saveReportableEmissions(emissionsParams);
+    }
+
+    @Test
+    void updateReportableEmissions_negative_total() {
+        AerContainer aerContainer = AerContainer.builder().reportingYear(Year.of(2020)).build();
+        AerSubmitParams params = AerSubmitParams.builder().accountId(1L).aerContainer(aerContainer).build();
+        when(reportableEmissionsCalculationService.calculateYearEmissions(aerContainer))
+                .thenReturn(BigDecimal.valueOf(-1));
+
+        BusinessException be = assertThrows(BusinessException.class,
+                () -> aerService.updateReportableEmissions(params, false));
+
+        assertEquals(MetsErrorCode.AER_NEGATIVE_TOTAL_EMISSIONS, be.getErrorCode());
+        verifyNoInteractions(reportableEmissionsService);
     }
 
     @Test

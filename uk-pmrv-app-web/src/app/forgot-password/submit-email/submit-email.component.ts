@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder } from '@angular/forms';
 
+import { EMPTY } from 'rxjs';
+
+import { catchTooManyRequests } from '@error/business-errors';
 import { BackLinkService } from '@shared/back-link/back-link.service';
 
 import { GovukValidators } from 'govuk-components';
@@ -39,11 +42,24 @@ export class SubmitEmailComponent implements OnInit {
   }
 
   onSubmit(): void {
+    this.form.get('email').updateValueAndValidity();
+
     if (this.form.valid) {
-      this.forgotPasswordService.sendResetPasswordEmail({ email: this.form.get('email').value }).subscribe(() => {
-        this.isEmailSent = true;
-        this.backLinkService.hide();
-      });
+      this.forgotPasswordService
+        .sendResetPasswordEmail({ email: this.form.get('email').value })
+        .pipe(
+          catchTooManyRequests(() => {
+            this.form
+              .get('email')
+              .setErrors({ tooManyRequests: 'You have requested too many password reset emails. Try again later' });
+            this.isSummaryDisplayed = true;
+            return EMPTY;
+          }),
+        )
+        .subscribe(() => {
+          this.isEmailSent = true;
+          this.backLinkService.hide();
+        });
     } else {
       this.isSummaryDisplayed = true;
     }

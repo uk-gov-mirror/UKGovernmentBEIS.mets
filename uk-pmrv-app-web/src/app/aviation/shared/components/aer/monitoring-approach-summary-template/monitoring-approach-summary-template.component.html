@@ -4,10 +4,11 @@
     <dd govukSummaryListRowValue>
       {{ data.monitoringApproachType | monitoringApproachType: 'aer' }}
     </dd>
-    <dd></dd>
-    <dd govukSummaryListRowActions *ngIf="isEditable">
-      <a govukLink routerLink="../" [queryParams]="changeUrlQueryParams">Change</a>
-    </dd>
+    @if (isEditable) {
+      <dd govukSummaryListRowActions>
+        <a govukLink routerLink="../" [queryParams]="changeUrlQueryParams">Change</a>
+      </dd>
+    }
   </div>
 </dl>
 
@@ -20,10 +21,11 @@
       <div>Sept to Dec: {{ data.numOfFlightsSepDec }} flights</div>
       <div>Total: {{ +data.numOfFlightsJanApr + +data.numOfFlightsMayAug + +data.numOfFlightsSepDec }} flights</div>
     </dd>
-    <dd></dd>
-    <dd govukSummaryListRowActions *ngIf="isEditable">
-      <a govukLink routerLink="../total-number-full-scope-flights" [queryParams]="changeUrlQueryParams">Change</a>
-    </dd>
+    @if (isEditable) {
+      <dd govukSummaryListRowActions>
+        <a govukLink routerLink="../total-number-full-scope-flights" [queryParams]="changeUrlQueryParams">Change</a>
+      </dd>
+    }
   </div>
 </dl>
 
@@ -46,16 +48,17 @@
       tonnes CO2
     </dd>
     <dd govukSummaryListRowValue *ngIf="data?.totalEmissions">{{ data.totalEmissions }} tonnes CO2</dd>
-    <dd></dd>
-    <dd govukSummaryListRowActions *ngIf="isEditable">
-      <a
-        govukLink
-        [routerLink]="
-          data?.totalEmissionsType ? '../scheme-year-total-emissions' : '../total-number-full-scope-flights'
-        "
-        [queryParams]="changeUrlQueryParams">
-        Change
-      </a>
-    </dd>
+    @if (isEditable) {
+      <dd govukSummaryListRowActions>
+        <a
+          govukLink
+          [routerLink]="
+            data?.totalEmissionsType ? '../scheme-year-total-emissions' : '../total-number-full-scope-flights'
+          "
+          [queryParams]="changeUrlQueryParams">
+          Change
+        </a>
+      </dd>
+    }
   </div>
 </dl>

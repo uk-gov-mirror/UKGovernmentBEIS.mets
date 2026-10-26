@@ -3,11 +3,9 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors, withInterceptor
 import { ApplicationRef, DoBootstrap, ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule, Title } from '@angular/platform-browser';
 
-import { combineLatest, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
-import { initializeGoogleAnalytics } from '@core/analytics';
 import { ConfigService } from '@core/config/config.service';
-import { AnalyticsInterceptor } from '@core/interceptors/analytics.interceptor';
 import { AuthService } from '@core/services/auth.service';
 import { LatestTermsService } from '@core/services/latest-terms.service';
 import {
@@ -98,11 +96,6 @@ const keycloakEventSignal = createKeycloakSignal(keycloakInstance);
       useClass: PendingRequestInterceptor,
       multi: true,
     },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AnalyticsInterceptor,
-      multi: true,
-    },
     Title,
   ],
 })
@@ -119,8 +112,6 @@ export class AppModule implements DoBootstrap {
       })
       .then(() => firstValueFrom(authService.checkUser()))
       .then(() => firstValueFrom(latestTermsService.initLatestTerms()))
-      .then(() => firstValueFrom(combineLatest([configService.getMeasurementId(), configService.getPropertyId()])))
-      .then(([measurementId, propertyId]) => initializeGoogleAnalytics(measurementId, propertyId))
       .then(() => appRef.bootstrap(AppComponent))
       .catch((error) => console.error('[ngDoBootstrap] init Keycloak failed', error));
   }

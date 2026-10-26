@@ -23,10 +23,34 @@ class SettingsServiceTest {
     private SettingsFeeAuthorizationService settingsFeeAuthorizationService;
 
     @Mock
+    private SettingsEmissionFactorsAuthorizationService settingsEmissionFactorsAuthorizationService;
+
+    @Mock
     private AppUser appUser;
 
     @Test
-    void getAccessibleSections_installation_withFeeViewPermission_returnsFees() {
+    void getAccessibleSections_installation_withBothPermissions_returnsBothSections() {
+        when(settingsEmissionFactorsAuthorizationService.canView(appUser)).thenReturn(true);
+        when(settingsFeeAuthorizationService.canView(appUser)).thenReturn(true);
+
+        List<SettingsSection> result = service.getAccessibleSections(appUser, AccountType.INSTALLATION);
+
+        assertThat(result).containsExactly(SettingsSection.EMISSION_FACTORS, SettingsSection.FEES);
+    }
+
+    @Test
+    void getAccessibleSections_installation_withEmissionFactorsPermissionOnly_returnsEmissionFactors() {
+        when(settingsEmissionFactorsAuthorizationService.canView(appUser)).thenReturn(true);
+        when(settingsFeeAuthorizationService.canView(appUser)).thenReturn(false);
+
+        List<SettingsSection> result = service.getAccessibleSections(appUser, AccountType.INSTALLATION);
+
+        assertThat(result).containsExactly(SettingsSection.EMISSION_FACTORS);
+    }
+
+    @Test
+    void getAccessibleSections_installation_withFeePermissionOnly_returnsFees() {
+        when(settingsEmissionFactorsAuthorizationService.canView(appUser)).thenReturn(false);
         when(settingsFeeAuthorizationService.canView(appUser)).thenReturn(true);
 
         List<SettingsSection> result = service.getAccessibleSections(appUser, AccountType.INSTALLATION);
@@ -35,7 +59,8 @@ class SettingsServiceTest {
     }
 
     @Test
-    void getAccessibleSections_aviation_withFeeViewPermission_returnsFees() {
+    void getAccessibleSections_aviation_withEmissionFactorsPermission_excludesEmissionFactors() {
+        when(settingsEmissionFactorsAuthorizationService.canView(appUser)).thenReturn(true);
         when(settingsFeeAuthorizationService.canView(appUser)).thenReturn(true);
 
         List<SettingsSection> result = service.getAccessibleSections(appUser, AccountType.AVIATION);
@@ -45,6 +70,7 @@ class SettingsServiceTest {
 
     @Test
     void getAccessibleSections_withNoPermissions_returnsEmpty() {
+        when(settingsEmissionFactorsAuthorizationService.canView(appUser)).thenReturn(false);
         when(settingsFeeAuthorizationService.canView(appUser)).thenReturn(false);
 
         List<SettingsSection> result = service.getAccessibleSections(appUser, AccountType.INSTALLATION);

@@ -60,6 +60,8 @@ public class AerViolation {
         VERIFICATION_ACTIVITY_LEVEL_REPORT_NOT_APPLICABLE_HSE("Verification Activity level report task is not applicable for HSE permit type"),
         VERIFICATION_ACTIVITY_LEVEL_REPORT_NOT_APPLICABLE_GHGE("Verification Activity Level Report Task and GHGE permit type are not mutually valid"),
         VERIFICATION_ACTIVITY_LEVEL_REPORT_NOT_APPLICABLE("Verification Activity Level Report task is not applicable part of the AER"),
+        TOTAL_EMISSIONS_NEGATIVE("Total AER emissions cannot be negative"),
+        VERIFICATION_TOTAL_EMISSIONS_NEGATIVE("Total verified emissions cannot be negative"),
         ;
 
         private final String message;

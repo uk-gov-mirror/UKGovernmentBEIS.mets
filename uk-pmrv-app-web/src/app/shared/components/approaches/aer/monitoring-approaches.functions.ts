@@ -1,4 +1,8 @@
+import BigNumber from 'bignumber.js';
+
 import {
+  CalculationEmissionCalculationParamValues,
+  CalculationOfCO2Emissions,
   CalculationSourceStreamEmission,
   MeasurementCO2EmissionPointEmission,
   MeasurementN2OEmissionPointEmission,
@@ -48,4 +52,52 @@ export function isPfcWizardComplete(sourceStreamEmission: PfcSourceStreamEmissio
   const calculationCorrect = sourceStreamEmission?.calculationCorrect;
 
   return calculationCorrect !== undefined && calculationCorrect !== null;
+}
+
+export function getCalculationSourceStreamEmissionValues(
+  sourceStreamEmission: CalculationSourceStreamEmission,
+  hasTransfer: boolean,
+  isReview: boolean,
+): [number | string, number | string] {
+  const emissionCalculationParamValues: CalculationEmissionCalculationParamValues =
+    sourceStreamEmission?.parameterCalculationMethod?.emissionCalculationParamValues;
+
+  let [reportableEmissions, biomassEmissions]: [number | string, number | string] =
+    isReview || isCalculationWizardComplete(sourceStreamEmission, hasTransfer)
+      ? [
+          emissionCalculationParamValues?.providedEmissions?.totalProvidedReportableEmissions ??
+            (emissionCalculationParamValues?.totalReportableEmissions || 0),
+          emissionCalculationParamValues?.providedEmissions?.totalProvidedSustainableBiomassEmissions ??
+            (emissionCalculationParamValues?.totalSustainableBiomassEmissions || 0),
+        ]
+      : [0, 0];
+
+  if (hasTransfer && !!sourceStreamEmission?.transfer?.entryAccountingForTransfer) {
+    if (sourceStreamEmission?.transfer?.transferDirection === 'RECEIVED_FROM_ANOTHER_INSTALLATION') {
+      reportableEmissions = new BigNumber(reportableEmissions).abs().toString();
+      biomassEmissions = new BigNumber(biomassEmissions).abs().toString();
+    } else {
+      reportableEmissions = new BigNumber(reportableEmissions).abs().negated().toString();
+      biomassEmissions = new BigNumber(biomassEmissions).abs().negated().toString();
+    }
+  }
+
+  return [reportableEmissions, biomassEmissions];
+}
+
+export function getCalculationTotalReportableEmissions(
+  calculation: CalculationOfCO2Emissions,
+  isReview = false,
+): BigNumber {
+  return (calculation?.sourceStreamEmissions ?? []).reduce(
+    (total, sourceStreamEmission) =>
+      total.plus(
+        getCalculationSourceStreamEmissionValues(sourceStreamEmission, !!calculation.hasTransfer, isReview)[0],
+      ),
+    new BigNumber(0),
+  );
+}
+
+export function isCalculationTotalReportableEmissionsNegative(calculation: CalculationOfCO2Emissions): boolean {
+  return getCalculationTotalReportableEmissions(calculation).isLessThan(0);
 }

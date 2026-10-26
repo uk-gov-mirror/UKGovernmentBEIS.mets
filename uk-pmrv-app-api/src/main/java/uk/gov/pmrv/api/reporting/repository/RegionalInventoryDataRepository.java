@@ -1,6 +1,8 @@
 package uk.gov.pmrv.api.reporting.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.pmrv.api.reporting.domain.RegionalInventoryData;
@@ -16,4 +18,9 @@ public interface RegionalInventoryDataRepository extends JpaRepository<RegionalI
 
     @Transactional(readOnly = true)
     boolean existsByReportingYear(Year reportingYear);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("DELETE FROM RegionalInventoryData r WHERE r.reportingYear = :reportingYear")
+    void deleteByReportingYear(Year reportingYear);
 }

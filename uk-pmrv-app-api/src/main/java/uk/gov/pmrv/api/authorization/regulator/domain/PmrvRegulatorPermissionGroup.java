@@ -125,4 +125,7 @@ public class PmrvRegulatorPermissionGroup {
 
     // Settings Page Fees
     public static final String SETTINGS_PAGE_FEES = "SETTINGS_PAGE_FEES";
+
+    // Settings Page Emission Factors
+    public static final String SETTINGS_PAGE_EMISSION_FACTORS = "SETTINGS_PAGE_EMISSION_FACTORS";
 }

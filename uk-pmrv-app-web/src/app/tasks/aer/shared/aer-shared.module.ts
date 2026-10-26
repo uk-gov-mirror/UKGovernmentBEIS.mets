@@ -10,6 +10,8 @@ import { TaskSharedModule } from '@tasks/shared/task-shared-module';
 
 import { AerInherentSummaryTemplateComponent } from './components/aer-inherent-summary-template/aer-inherent-summary-template.component';
 import { AerTaskComponent } from './components/aer-task/aer-task.component';
+import { IncludeActivityDataInfoComponent } from './components/include-activity-data-info/include-activity-data-info.component';
+import { IncludeCalcMeasurementInfoComponent } from './components/include-calc-measurement-info/include-calc-measurement-info.component';
 import { MeasurementTierReviewSummaryComponent } from './components/measurement-tier-review-summary/measurement-tier-review-summary.component';
 import { ReturnLinkComponent } from './components/return-link/return-link.component';
 import { DateRangeComponent } from './components/submit/date-range/date-range.component';
@@ -21,7 +23,13 @@ import { TaskPipe } from './pipes/task.pipe';
 import { TaskStatusPipe } from './pipes/task-status.pipe';
 
 @NgModule({
-  imports: [RouterModule, SharedModule, TaskSharedModule],
+  imports: [
+    RouterModule,
+    SharedModule,
+    TaskSharedModule,
+    IncludeCalcMeasurementInfoComponent,
+    IncludeActivityDataInfoComponent,
+  ],
   declarations: [
     AerInherentSummaryTemplateComponent,
     AerReviewGroupDecisionComponent,
@@ -48,6 +56,8 @@ import { TaskStatusPipe } from './pipes/task-status.pipe';
     ApproachesTierReviewSummaryComponent,
     DateRangeComponent,
     DeleteComponent,
+    IncludeActivityDataInfoComponent,
+    IncludeCalcMeasurementInfoComponent,
     MeasurementTierReviewSummaryComponent,
     ReturnLinkComponent,
     TaskPipe,

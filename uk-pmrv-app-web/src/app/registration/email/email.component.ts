@@ -1,5 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { UntypedFormBuilder } from '@angular/forms';
+
+import { EMPTY } from 'rxjs';
+
+import { catchTooManyRequests } from '@error/business-errors';
 
 import { GovukValidators } from 'govuk-components';
 
@@ -14,9 +18,9 @@ import { BackLinkService } from '../../shared/back-link/back-link.service';
   templateUrl: './email.component.html',
 })
 export class EmailComponent implements OnInit {
-  isSummaryDisplayed: boolean;
-  isVerificationSent: boolean;
-  isSubmitDisabled: boolean;
+  isSummaryDisplayed = signal(false);
+  isVerificationSent = signal(false);
+  isSubmitDisabled = signal(false);
 
   form = this.fb.group({
     email: [
@@ -40,16 +44,29 @@ export class EmailComponent implements OnInit {
   }
 
   submitEmail(): void {
+    // clears the error of a previous rejected request so that the same email can be submitted again
+    this.form.get('email').updateValueAndValidity();
+
     if (this.form.valid) {
-      this.isSubmitDisabled = true;
+      this.isSubmitDisabled.set(true);
       this.operatorUsersRegistrationService
         .sendVerificationEmail({ email: this.form.get('email').value })
+        .pipe(
+          catchTooManyRequests(() => {
+            this.form
+              .get('email')
+              .setErrors({ tooManyRequests: 'You have requested too many verification emails. Try again later' });
+            this.isSummaryDisplayed.set(true);
+            this.isSubmitDisabled.set(false);
+            return EMPTY;
+          }),
+        )
         .subscribe(() => {
-          this.isVerificationSent = true;
+          this.isVerificationSent.set(true);
           this.backLinkService.hide();
         });
     } else {
-      this.isSummaryDisplayed = true;
+      this.isSummaryDisplayed.set(true);
     }
   }
 }

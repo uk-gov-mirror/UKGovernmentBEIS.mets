@@ -163,6 +163,23 @@ describe('PermanentCessationComponent', () => {
     ]);
   });
 
+  it('should associate the date inputs with their format hints via aria-describedby', () => {
+    page.inputs[3].click();
+    fixture.detectChanges();
+
+    [
+      ['notification.startDateOfNonCompliance', 'Must be today or in the past'],
+      ['notification.endDateOfNonCompliance', 'Must be today or in the future'],
+    ].forEach(([identifier, hint]) => {
+      expect(fixture.nativeElement.querySelector(`[id="${identifier}-hint"]`).textContent.trim()).toEqual(hint);
+      ['day', 'month', 'year'].forEach((part) =>
+        expect(
+          fixture.nativeElement.querySelector(`[id="${identifier}-${part}"]`).getAttribute('aria-describedby'),
+        ).toEqual(`${identifier}-hint`),
+      );
+    });
+  });
+
   it('should apply field validations', () => {
     hostComponent.form.markAllAsTouched();
     fixture.detectChanges();

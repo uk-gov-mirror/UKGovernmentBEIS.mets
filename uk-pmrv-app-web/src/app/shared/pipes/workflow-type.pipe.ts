@@ -31,7 +31,10 @@ export class WorkflowTypePipe implements PipeTransform {
       case 'PERMIT_NOTIFICATION':
         return 'Permit Notification';
       case 'PERMIT_REISSUE':
+      case 'PERMIT_BATCH_REISSUE':
         return 'Batch variation';
+      case 'PERMANENT_CESSATION':
+        return 'Permanent cessation';
 
       case 'NON_COMPLIANCE':
         return 'Non-compliance';
@@ -50,6 +53,18 @@ export class WorkflowTypePipe implements PipeTransform {
         return 'Determine emissions';
       case 'HSE_TI':
         return 'HSE target increase application';
+      case 'BDR':
+        return 'Baseline data report';
+      case 'BDRS2':
+        return 'Baseline data report (stage 2)';
+      case 'ALR':
+        return 'Activity level report';
+      case 'WASTE_QDR':
+        return 'Waste voluntary quarterly report';
+      case 'INSTALLATION_AUDIT':
+        return 'Audit report';
+      case 'INSTALLATION_ONSITE_INSPECTION':
+        return 'On-site inspection';
 
       case 'WITHHOLDING_OF_ALLOWANCES':
         return 'Withholding of allowances';
@@ -64,6 +79,7 @@ export class WorkflowTypePipe implements PipeTransform {
         return 'Non-compliance';
 
       case 'EMP_REISSUE':
+      case 'EMP_BATCH_REISSUE':
         return 'Batch variation';
       case 'EMP_ISSUANCE_CORSIA':
       case 'EMP_ISSUANCE_UKETS':
@@ -79,6 +95,12 @@ export class WorkflowTypePipe implements PipeTransform {
         return 'Determine emissions';
       case 'AVIATION_VIR':
         return 'Verifier improvement';
+      case 'AVIATION_DOE_CORSIA':
+        return 'Estimate emissions';
+      case 'AVIATION_AER_CORSIA_ANNUAL_OFFSETTING':
+        return 'Calculate annual offsetting requirements';
+      case 'AVIATION_AER_CORSIA_3YEAR_PERIOD_OFFSETTING':
+        return 'Calculate 3-year offsetting requirements';
 
       default:
         return null;

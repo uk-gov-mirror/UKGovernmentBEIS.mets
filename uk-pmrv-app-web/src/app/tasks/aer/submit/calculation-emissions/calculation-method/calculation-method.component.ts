@@ -2,9 +2,15 @@ import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { combineLatest, first, map, switchMap, takeUntil } from 'rxjs';
+import { combineLatest, first, map, Observable, switchMap, takeUntil } from 'rxjs';
 
-import { AerApplicationSubmitRequestTaskPayload, CalculationOfCO2Emissions } from 'pmrv-api';
+import { SourceStreamDescriptionPipe } from '@shared/pipes/source-streams-description.pipe';
+
+import {
+  AerApplicationSubmitRequestTaskPayload,
+  CalculationOfCO2Emissions,
+  CalculationSourceStreamEmission,
+} from 'pmrv-api';
 
 import { PendingRequestService } from '../../../../../core/guards/pending-request.service';
 import { DestroySubject } from '../../../../../core/services/destroy-subject.service';
@@ -31,6 +37,23 @@ export class CalculationMethodComponent {
     }),
   );
 
+  sourceStreamEmission$: Observable<CalculationSourceStreamEmission> = combineLatest([this.payload$, this.index$]).pipe(
+    map(([payload, index]) => {
+      return (payload.aer.monitoringApproachEmissions.CALCULATION_CO2 as CalculationOfCO2Emissions)
+        ?.sourceStreamEmissions?.[index];
+    }),
+  );
+
+  sourceStream$ = combineLatest([this.payload$, this.sourceStreamEmission$]).pipe(
+    map(([payload, sourceStreamEmission]) => {
+      const usedSourceStream = payload.aer.sourceStreams.find(
+        (sourceStream) => sourceStream.id === sourceStreamEmission.sourceStream,
+      );
+
+      return `${usedSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(usedSourceStream)}`;
+    }),
+  );
+
   isEditable$ = this.aerService.isEditable$;
 
   constructor(
@@ -39,6 +62,7 @@ export class CalculationMethodComponent {
     private readonly router: Router,
     readonly route: ActivatedRoute,
     readonly pendingRequest: PendingRequestService,
+    readonly sourceStreamDescriptionPipe: SourceStreamDescriptionPipe,
     private readonly destroy$: DestroySubject,
   ) {}
 

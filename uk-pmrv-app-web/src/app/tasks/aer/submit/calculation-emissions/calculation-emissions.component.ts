@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { UntypedFormGroup } from '@angular/forms';
 
 import { filter, map } from 'rxjs';
 
+import { isCalculationTotalReportableEmissionsNegative } from '@shared/components/approaches/aer/monitoring-approaches.functions';
 import { AerService } from '@tasks/aer/core/aer.service';
 
 import { AerApplicationSubmitRequestTaskPayload, CalculationOfCO2Emissions } from 'pmrv-api';
@@ -34,6 +36,21 @@ export class CalculationEmissionsComponent {
           (tier, index) => sourceStreamEmissionStatus('CALCULATION_CO2', payload, index),
         ) ?? []
       );
+    }),
+  );
+
+  negativeTotalEmissionsForm$ = this.aer$.pipe(
+    map((aer) =>
+      isCalculationTotalReportableEmissionsNegative(
+        aer.monitoringApproachEmissions.CALCULATION_CO2 as CalculationOfCO2Emissions,
+      ),
+    ),
+    map((isNegative) => {
+      const form = new UntypedFormGroup({});
+      if (isNegative) {
+        form.setErrors({ negativeTotalEmissions: 'The total emissions should be greater than or equal to 0' });
+      }
+      return form;
     }),
   );
 

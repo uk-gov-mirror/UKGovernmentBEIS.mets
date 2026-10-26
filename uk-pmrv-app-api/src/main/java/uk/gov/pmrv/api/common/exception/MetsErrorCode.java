@@ -105,6 +105,7 @@ public enum MetsErrorCode implements NetzErrorCode {
     AER_REQUEST_IS_NOT_AER("AER1006", HttpStatus.BAD_REQUEST, "Provided request id is not of type AER"),
     INVALID_AER_REVIEW("AER1007", HttpStatus.BAD_REQUEST, "Invalid Aer review"),
     INVALID_SOURCE_STREAM_TYPE("AER1008", HttpStatus.BAD_REQUEST, "Invalid Source Stream type"),
+    AER_NEGATIVE_TOTAL_EMISSIONS("AER1009", HttpStatus.BAD_REQUEST, "AER total emissions cannot be negative"),
 
     /** Codes for VIR. */
     VIR_CREATION_NOT_ALLOWED("VIR1000", HttpStatus.BAD_REQUEST, "VIR creation is not allowed"),
@@ -118,7 +119,7 @@ public enum MetsErrorCode implements NetzErrorCode {
     INVALID_AIR("AIR1001", HttpStatus.BAD_REQUEST, "Invalid AIR"),
     INVALID_AIR_REVIEW("AIR1002", HttpStatus.BAD_REQUEST, "Invalid AIR review"),
     
-    /**Emissions Monitoring Plan error codes */
+    /** Emissions Monitoring Plan error codes */
     INVALID_EMP("EMP1001", HttpStatus.BAD_REQUEST, "Invalid Emissions Monitoring Plan"),
     INVALID_EMP_REVIEW("EMP1002", HttpStatus.BAD_REQUEST, "Invalid Emissions Monitoring Plan review"),
     NO_EMP_SERVICE_FOUND("EMP1003", HttpStatus.NOT_FOUND, "No associated Emissions Monitoring Plan service found"),
@@ -137,7 +138,6 @@ public enum MetsErrorCode implements NetzErrorCode {
     INVALID_ALLOWANCE_ALLOCATIONS("ALLOWANCE1001", HttpStatus.BAD_REQUEST, "Invalid Allowance Allocation values"),
 
     /** Codes for registry integration. */
-
     INTEGRATION_REGISTRY_EMISSIONS_INSTALLATION_AER_NOT_FOUND("INTREGEMISSIONSINST1000", HttpStatus.INTERNAL_SERVER_ERROR, "Cannot send emissions to ETS Registry because no aer request has been found"),
     INTEGRATION_REGISTRY_EMISSIONS_INSTALLATION_WRONG_AER_INITIATOR_TYPE("INTREGEMISSIONSINST1001", HttpStatus.INTERNAL_SERVER_ERROR,  "Emissions updated are not sent to ETS Registry because AER initiator was not within the allowed types"),
     INTEGRATION_REGISTRY_EMISSIONS_INSTALLATION_REPORTING_PERIOD_FROM_NOT_FOUND("INTREGEMISSIONSINST1002", HttpStatus.INTERNAL_SERVER_ERROR, "Cannot send emissions to ETS Registry because no configuration for the aer.installation.reporting-period.from property has been found"),
@@ -152,7 +152,23 @@ public enum MetsErrorCode implements NetzErrorCode {
 
     GHGE_REGISTRY_REPORTING_FIRST_YEAR_EMPTY_VALUE("REPFIRSTEMPTY1000",HttpStatus.BAD_REQUEST,"The value registry reporting first year cannot be empty for an account with a ghge permit type"),
     REGISTRY_REPORTING_FIRST_YEAR_INVALID_ACCOUNT_STATUS("REPFIRSTINVACCOUNT1000",HttpStatus.BAD_REQUEST,"Invalid account status for the update of the registry reporting first year value"),
-    REGISTRY_REPORTING_FIRST_YEAR_INVALID_EMISSIONS("REPFIRSTINVEMISSIONS1000",HttpStatus.BAD_REQUEST,"Invalid value for registry reporting first year. The year cannot be later than the first year of reported emissions")
+    REGISTRY_REPORTING_FIRST_YEAR_INVALID_EMISSIONS("REPFIRSTINVEMISSIONS1000",HttpStatus.BAD_REQUEST,"Invalid value for registry reporting first year. The year cannot be later than the first year of reported emissions"),
+
+    /** Codes for rate limiting. */
+    TOO_MANY_REQUESTS("TOO_MANY_REQUESTS", HttpStatus.TOO_MANY_REQUESTS, HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase()),
+
+    /** Codes for Settings. */
+    EMISSION_FACTORS_FILE_PARSE_ERROR("SETTINGS1000", HttpStatus.BAD_REQUEST, "Emission factors Excel file could not be parsed"),
+    EMISSION_FACTORS_UPLOAD_IN_AER_PERIOD("SETTINGS1001", HttpStatus.BAD_REQUEST, "Emission factors cannot be uploaded after the AER reporting period has started"),
+    EMISSION_FACTORS_FILE_NOT_XLSX("SETTINGS1002", HttpStatus.BAD_REQUEST, "The selected file must be an XLSX"),
+    EMISSION_FACTORS_FILE_WRONG_YEAR("SETTINGS1003", HttpStatus.BAD_REQUEST, "The selected file must be for the current reporting year"),
+    EMISSION_FACTORS_FILE_MISSING("SETTINGS1004", HttpStatus.BAD_REQUEST, "The emission factors file is missing. Upload the file again"),
+    EMISSION_FACTORS_UPLOAD_NOT_FOUND("SETTINGS1005", HttpStatus.BAD_REQUEST,
+        "The uploaded emission factors file does not exist or has already been submitted. Upload the file again"),
+    EMISSION_FACTORS_DUPLICATE_NATIONAL_INVENTORY_ENTRY("SETTINGS1009", HttpStatus.BAD_REQUEST,
+        "Duplicate sector and fuel combination found in national inventory data"),
+    EMISSION_FACTORS_DUPLICATE_REGIONAL_GAS_ENTRY("SETTINGS1010", HttpStatus.BAD_REQUEST,
+        "Duplicate charging zone code found in regional natural gas data")
     ;
 
     /** The error code. */

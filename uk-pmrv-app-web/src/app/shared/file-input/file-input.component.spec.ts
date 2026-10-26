@@ -30,13 +30,21 @@ describe('FileInputComponent', () => {
     standalone: false,
     template: `
       <form [formGroup]="form">
-        <app-file-input formControlName="file" [downloadUrl]="getDownloadUrl"></app-file-input>
+        <app-file-input
+          formControlName="file"
+          [downloadUrl]="getDownloadUrl"
+          label="Upload the report"
+          listTitle="Report added"
+          [headerSize]="headerSize"
+          [headingLevel]="headingLevel"></app-file-input>
       </form>
     `,
   })
   class TestComponent {
     form = new FormGroup({ file: new FormControl({ file: new File(['abc'], 'uploaded-file.txt'), uuid: '1234' }) });
     getDownloadUrl = jest.fn((uuid: string) => `/download/${uuid}`);
+    headerSize: 'm' | 's' = undefined;
+    headingLevel = 2;
   }
 
   class Page extends BasePage<TestComponent> {
@@ -58,6 +66,14 @@ describe('FileInputComponent', () => {
 
     set file(file: File) {
       this.setInputValue('input', file ?? []);
+    }
+
+    get input() {
+      return this.query<HTMLInputElement>('input');
+    }
+
+    get trigger() {
+      return this.query<HTMLLabelElement>('label[role="link"]');
     }
   }
 
@@ -190,5 +206,100 @@ describe('FileInputComponent', () => {
     fixture.detectChanges();
 
     expect(control.value).toEqual({ file, uuid: null, dimensions: null });
+  });
+
+  describe('title markup', () => {
+    const input = () => page.query<HTMLInputElement>('input');
+    const title = () => page.query<HTMLElement>(`[id="l.${input().id}"]`);
+
+    it('should render a plain label when no header size is given', () => {
+      expect(title().tagName).toEqual('LABEL');
+      expect(title().getAttribute('for')).toEqual(input().id);
+      expect(page.queryAll('h2').map((el) => el.textContent.trim())).toEqual(['Report added']);
+    });
+
+    it('should render an h2 heading referenced by the input when a header size is given', () => {
+      hostComponent.headerSize = 's';
+      fixture.detectChanges();
+
+      expect(title().tagName).toEqual('H2');
+      expect(title().className).toEqual('govuk-heading-s');
+      expect(title().textContent.trim()).toEqual('Upload the report');
+      expect(input().getAttribute('aria-labelledby')).toEqual(`l.${input().id} ld.${input().id}`);
+    });
+
+    it('should render the title and list title at the given heading level', () => {
+      hostComponent.headerSize = 's';
+      hostComponent.headingLevel = 3;
+      fixture.detectChanges();
+
+      expect(page.queryAll('h2')).toHaveLength(0);
+      expect(page.queryAll('h3').map((el) => el.textContent.trim())).toEqual(['Report added', 'Upload the report']);
+    });
+  });
+
+  describe('speech recognition support', () => {
+    it('should expose a visible label as a focusable link that targets the hidden input', () => {
+      expect(page.trigger.getAttribute('for')).toEqual(page.input.id);
+      expect(page.trigger.getAttribute('tabindex')).toEqual('0');
+      expect(page.trigger.getAttribute('aria-labelledby')).toEqual(`l.${page.input.id} ld.${page.input.id}`);
+      expect(page.trigger.getAttribute('aria-describedby')).toEqual(`${page.input.id}-hints`);
+      expect(page.trigger.textContent.trim()).toEqual('Choose file');
+      expect(page.input.getAttribute('tabindex')).toEqual('-1');
+    });
+
+    it.each(['Enter', ' '])('should open the file picker on "%s" key', (key) => {
+      const clickSpy = jest.spyOn(page.input, 'click').mockImplementation();
+      const event = new KeyboardEvent('keydown', { key, cancelable: true });
+
+      page.trigger.dispatchEvent(event);
+
+      expect(clickSpy).toHaveBeenCalledTimes(1);
+      expect(event.defaultPrevented).toBeTruthy();
+    });
+
+    it('should not be focusable or open the file picker when disabled', () => {
+      control.disable();
+      fixture.detectChanges();
+      const clickSpy = jest.spyOn(page.input, 'click').mockImplementation();
+
+      page.trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+
+      expect(clickSpy).not.toHaveBeenCalled();
+      expect(page.trigger.hasAttribute('tabindex')).toBeFalsy();
+      expect(page.trigger.getAttribute('aria-disabled')).toEqual('true');
+      expect(page.trigger.classList).toContain('govuk-button--disabled');
+    });
+
+    it('should move focus from the hidden input to the trigger', () => {
+      page.input.focus();
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(page.trigger);
+      expect(page.trigger.classList).toContain('moj-multi-file-upload--focused');
+    });
+
+    it('should move focus to the trigger after deleting the file', () => {
+      page.delete.click();
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(page.trigger);
+    });
+
+    it('should mark the control as touched when the trigger loses focus', () => {
+      page.trigger.focus();
+      page.trigger.blur();
+
+      expect(control.touched).toBeTruthy();
+    });
+
+    it('should describe the trigger with the error message when errors are displayed', () => {
+      control.setErrors({ required: 'Select a file' });
+      fixture.debugElement.query(By.css('form')).triggerEventHandler('submit', {});
+      fixture.detectChanges();
+
+      expect(page.trigger.getAttribute('aria-describedby')).toEqual(`${page.input.id}-hints ${page.input.id}-error`);
+      expect(page.trigger.classList).toContain('app-file-input__trigger--error');
+    });
   });
 });

@@ -1,8 +1,11 @@
 package uk.gov.pmrv.api.workflow.request.flow.installation.permitrevocation.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import uk.gov.netz.api.files.common.domain.dto.FileInfoDTO;
+import uk.gov.pmrv.api.integration.registry.notification.common.RegistryNotificationType;
+import uk.gov.pmrv.api.integration.registry.notification.installation.request.InstallationNotificationRegistryEvent;
 import uk.gov.pmrv.api.workflow.request.core.domain.Request;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestActionPayloadType;
 import uk.gov.pmrv.api.workflow.request.core.domain.enumeration.RequestActionType;
@@ -23,6 +26,7 @@ public class PermitRevocationSubmittedService {
     private final RequestService requestService;
     private final PermitRevocationOfficialNoticeService permitRevocationOfficialNoticeService;
     private final RequestActionUserInfoResolver requestActionUserInfoResolver;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     public void submit(final String requestId) {
 
@@ -56,5 +60,15 @@ public class PermitRevocationSubmittedService {
         
         // send official notice
         permitRevocationOfficialNoticeService.sendOfficialNotice(request, officialNotice, decisionNotification);
+
+        // send permit revocation notification to registry
+        InstallationNotificationRegistryEvent installationNotificationRegistryEvent =
+                InstallationNotificationRegistryEvent.builder()
+                                .accountId(request.getAccountId())
+                                .requestId(request.getId())
+                                .registryNotificationType(RegistryNotificationType.PERMIT_REVOCATION_NOTIFICATION)
+                                .fileInfoDTO(officialNotice).build();
+
+        applicationEventPublisher.publishEvent(installationNotificationRegistryEvent);
     }
 }

@@ -91,11 +91,22 @@ describe('EmissionSourceTableComponent', () => {
 
     expect(page.rows).toEqual([
       [],
-      ['Rerum facere dolore', 'Saepe quis quaerat d', 'Change', 'Delete'],
-      ['Quia voluptate conse', 'Dolor at iure est n', 'Change', 'Delete'],
+      ['Rerum facere dolore', 'Saepe quis quaerat d', 'ChangeDelete'],
+      ['Quia voluptate conse', 'Dolor at iure est n', 'ChangeDelete'],
     ]);
 
     expect(page.changeLinks.length).toBe(2);
     expect(page.deleteLinks.length).toBe(2);
+  });
+
+  it.each([true, false])('should not render empty table headers when isEditable is %s', (isEditable) => {
+    createComponent();
+    fixture.componentInstance.isEditable = isEditable;
+    fixture.detectChanges();
+
+    const headers = page.queryAll<HTMLTableCellElement>('thead th');
+
+    expect(headers.map((th) => th.textContent.trim())).toEqual(['Reference', 'Description', 'Actions']);
+    expect(headers.slice(2).every((th) => th.querySelector('.govuk-visually-hidden'))).toBe(true);
   });
 });

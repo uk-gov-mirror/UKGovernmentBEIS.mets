@@ -32,9 +32,7 @@ export class SummaryComponent implements PendingRequest {
       return fallbackEmissions?.sourceStreams.map((sourceStreamKey) => {
         const aerSourceStream = payload.aer.sourceStreams.find((sourceStream) => sourceStream.id === sourceStreamKey);
 
-        return `${aerSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(
-          aerSourceStream.description,
-        )}`;
+        return `${aerSourceStream.reference} ${this.sourceStreamDescriptionPipe.transform(aerSourceStream)}`;
       });
     }),
   );

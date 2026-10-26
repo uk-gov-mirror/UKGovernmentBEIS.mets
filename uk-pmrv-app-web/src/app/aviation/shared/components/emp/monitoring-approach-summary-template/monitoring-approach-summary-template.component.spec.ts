@@ -68,18 +68,18 @@ describe('MonitoringApproachSummaryTemplateComponent', () => {
 
   it('should display the monitoring approach types', () => {
     expect(summaryListValues()).toEqual([
-      ['Monitoring approach', ['Use unmodified Eurocontrol Support Facility data', '']],
-      ['Simplified reporting eligibility', ['My explanation', '']],
-      ['Supporting evidence', ['test.png', '']],
+      ['Monitoring approach', ['Use unmodified Eurocontrol Support Facility data']],
+      ['Simplified reporting eligibility', ['My explanation']],
+      ['Supporting evidence', ['test.png']],
     ]);
 
     hostComponent.isEditable = true;
     fixture.detectChanges();
 
     expect(summaryListValues()).toEqual([
-      ['Monitoring approach', ['Use unmodified Eurocontrol Support Facility data', '', 'Change monitoring approach']],
-      ['Simplified reporting eligibility', ['My explanation', '', 'Change  simplified reporting eligibility']],
-      ['Supporting evidence', ['test.png', '', 'Change  supporting evidence']],
+      ['Monitoring approach', ['Use unmodified Eurocontrol Support Facility data', 'Change monitoring approach']],
+      ['Simplified reporting eligibility', ['My explanation', 'Change  simplified reporting eligibility']],
+      ['Supporting evidence', ['test.png', 'Change  supporting evidence']],
     ]);
 
     hostComponent.data = {
@@ -94,9 +94,9 @@ describe('MonitoringApproachSummaryTemplateComponent', () => {
     expect(summaryListValues()).toEqual([
       [
         'Monitoring approach',
-        ['Use your own flight data with the Eurocontrol Small Emitters Tool', '', 'Change monitoring approach'],
+        ['Use your own flight data with the Eurocontrol Small Emitters Tool', 'Change monitoring approach'],
       ],
-      ['Simplified reporting eligibility', ['My explanation', '', 'Change  simplified reporting eligibility']],
+      ['Simplified reporting eligibility', ['My explanation', 'Change  simplified reporting eligibility']],
     ]);
 
     hostComponent.data = {
@@ -108,7 +108,7 @@ describe('MonitoringApproachSummaryTemplateComponent', () => {
     fixture.detectChanges();
 
     expect(summaryListValues()).toEqual([
-      ['Monitoring approach', ['Use fuel use monitoring', '', 'Change monitoring approach']],
+      ['Monitoring approach', ['Use fuel use monitoring', 'Change monitoring approach']],
     ]);
   });
 
